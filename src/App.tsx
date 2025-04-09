@@ -6,6 +6,7 @@ import { EndpointDetails } from './components/EndpointDetails'
 import { DeviceSelector } from './components/DeviceSelector'
 import { InstalledApps } from './components/InstalledApps'
 import { ResponseActions } from './components/ResponseActions'
+import { EndpointsPanel } from './components/EndpointsPanel'
 import { ResponseFile } from './types/response'
 
 declare global {
@@ -168,38 +169,11 @@ function App() {
           </div>
         </div>
         <div className="flex-1 flex overflow-hidden">
-          <div
-            ref={endpointPanelRef}
-            className="flex flex-col border-r border-gray-700 relative"
-            style={{ width: `${endpointPanelWidth}px` }}
-          >
-            <div className="p-4 border-b border-gray-700">
-              <h2 className="text-lg font-semibold">Endpoints</h2>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              {selectedResponse && (
-                <div className="p-4 space-y-2">
-                  {Object.entries(selectedResponse.data).map(([endpoint, data]) => (
-                    <div
-                      key={endpoint}
-                      className={`p-2 rounded cursor-pointer ${
-                        selectedEndpoint === endpoint
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                      }`}
-                      onClick={() => setSelectedEndpoint(endpoint)}
-                    >
-                      {endpoint}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div
-              className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500"
-              onMouseDown={startResizing}
-            />
-          </div>
+          <EndpointsPanel
+            selectedResponse={selectedResponse}
+            selectedEndpoint={selectedEndpoint}
+            onEndpointClick={setSelectedEndpoint}
+          />
           <div className="flex-1 overflow-y-auto">
             {selectedResponse && selectedEndpoint && (
               <EndpointDetails
