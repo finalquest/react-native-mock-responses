@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { FileDrawer } from './components/FileDrawer'
 import { DrawerToggle } from './components/DrawerToggle'
 import { EndpointList } from './components/EndpointList'
@@ -30,6 +30,9 @@ function App() {
   const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null)
   const [selectedApp, setSelectedApp] = useState<{ packageName: string; appName: string } | null>(null)
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null)
+  const [endpointPanelWidth, setEndpointPanelWidth] = useState(300)
+  const [isResizing, setIsResizing] = useState(false)
+  const endpointPanelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const fetchResponses = async () => {
@@ -110,6 +113,33 @@ function App() {
     setSelectedDevice(deviceId)
   }
 
+  const startResizing = (e: React.MouseEvent) => {
+    setIsResizing(true)
+    e.preventDefault()
+  }
+
+  const stopResizing = () => {
+    setIsResizing(false)
+  }
+
+  const resize = (e: MouseEvent) => {
+    if (isResizing && endpointPanelRef.current) {
+      const newWidth = e.clientX - endpointPanelRef.current.getBoundingClientRect().left
+      if (newWidth >= 200 && newWidth <= 500) {
+        setEndpointPanelWidth(newWidth)
+      }
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resize)
+    window.addEventListener('mouseup', stopResizing)
+    return () => {
+      window.removeEventListener('mousemove', resize)
+      window.removeEventListener('mouseup', stopResizing)
+    }
+  }, [isResizing])
+
   return (
     <div className="flex h-screen bg-black">
       <FileDrawer
@@ -138,14 +168,37 @@ function App() {
           </div>
         </div>
         <div className="flex-1 flex overflow-hidden">
-          <div className="w-1/3 border-r border-gray-700 overflow-y-auto">
-            {selectedResponse && (
-              <EndpointList
-                selectedResponse={selectedResponse}
-                selectedEndpoint={selectedEndpoint}
-                onEndpointClick={handleEndpointClick}
-              />
-            )}
+          <div
+            ref={endpointPanelRef}
+            className="flex flex-col border-r border-gray-700 relative"
+            style={{ width: `${endpointPanelWidth}px` }}
+          >
+            <div className="p-4 border-b border-gray-700">
+              <h2 className="text-lg font-semibold">Endpoints</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {selectedResponse && (
+                <div className="p-4 space-y-2">
+                  {Object.entries(selectedResponse.data).map(([endpoint, data]) => (
+                    <div
+                      key={endpoint}
+                      className={`p-2 rounded cursor-pointer ${
+                        selectedEndpoint === endpoint
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                      }`}
+                      onClick={() => setSelectedEndpoint(endpoint)}
+                    >
+                      {endpoint}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div
+              className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500"
+              onMouseDown={startResizing}
+            />
           </div>
           <div className="flex-1 overflow-y-auto">
             {selectedResponse && selectedEndpoint && (
