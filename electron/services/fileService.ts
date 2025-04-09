@@ -3,14 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import { ResponseFile } from '../../src/types/response';
 
-// Get the project root directory using the current working directory
-const PROJECT_ROOT = process.cwd();
-const RESPONSES_DIR = path.join(PROJECT_ROOT, 'src/responses');
+// Get the project root directory using app.getAppPath()
+const PROJECT_ROOT = app.getAppPath();
+const RESPONSES_DIR = path.join(PROJECT_ROOT, 'src', 'responses');
 
 console.log('FileService initialized');
 console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('Current working directory:', process.cwd());
-console.log('Project root:', PROJECT_ROOT);
+console.log('App path:', PROJECT_ROOT);
 console.log('Responses directory:', RESPONSES_DIR);
 console.log('Directory exists:', fs.existsSync(RESPONSES_DIR));
 
@@ -22,47 +21,59 @@ export class FileService {
     
     console.log('FileService initialized');
     console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('Current working directory:', process.cwd());
-    console.log('Project root:', PROJECT_ROOT);
+    console.log('App path:', PROJECT_ROOT);
     console.log('Responses directory:', RESPONSES_DIR);
     console.log('Directory exists:', fs.existsSync(RESPONSES_DIR));
     
     this.initialized = true;
   }
 
-  static async getResponseFiles(): Promise<ResponseFile[]> {
+  public static getResponseFiles(): ResponseFile[] {
     this.initialize();
-    console.log('FileService: Looking for responses in:', RESPONSES_DIR);
     
-    if (!fs.existsSync(RESPONSES_DIR)) {
-      console.error('FileService: Responses directory not found:', RESPONSES_DIR);
+    try {
+      console.log('Getting response files from:', RESPONSES_DIR);
+      
+      if (!fs.existsSync(RESPONSES_DIR)) {
+        console.error('Responses directory does not exist:', RESPONSES_DIR);
+        return [];
+      }
+
+      const files = fs.readdirSync(RESPONSES_DIR);
+      console.log('Found files in directory:', files);
+
+      const responseFiles = files
+        .filter(file => {
+          const isJson = file.endsWith('.json');
+          console.log(`File ${file} is JSON:`, isJson);
+          return isJson;
+        })
+        .map(file => {
+          try {
+            const filePath = path.join(RESPONSES_DIR, file);
+            console.log('Reading file:', filePath);
+            
+            const content = fs.readFileSync(filePath, 'utf-8');
+            console.log(`File ${file} content length:`, content.length);
+            
+            const parsed = JSON.parse(content);
+            return {
+              filename: file,
+              data: parsed
+            } as ResponseFile;
+          } catch (err) {
+            console.error(`Error processing file ${file}:`, err);
+            return null;
+          }
+        })
+        .filter((file): file is ResponseFile => file !== null);
+
+      console.log('Processed response files count:', responseFiles.length);
+      return responseFiles;
+    } catch (err) {
+      console.error('Error in getResponseFiles:', err);
       return [];
     }
-    
-    const files = fs.readdirSync(RESPONSES_DIR);
-    console.log('FileService: Found files:', files);
-    
-    const responseFiles = files
-      .filter(file => {
-        const isJson = file.endsWith('.json');
-        console.log(`FileService: Checking file ${file}, isJson: ${isJson}`);
-        return isJson;
-      })
-      .map(filename => {
-        console.log('FileService: Processing file:', filename);
-        const filePath = path.join(RESPONSES_DIR, filename);
-        console.log('FileService: Full file path:', filePath);
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const data = JSON.parse(content);
-        console.log('FileService: Successfully parsed file:', filename);
-        return {
-          filename,
-          data
-        };
-      });
-
-    console.log(`FileService: Processed ${responseFiles.length} response files`);
-    return responseFiles;
   }
 
   static async getResponseFile(filename: string): Promise<ResponseFile | null> {
@@ -76,13 +87,29 @@ export class FileService {
       return null;
     }
 
-    console.log('FileService: Reading file:', filePath);
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const data = JSON.parse(content);
-    console.log('FileService: Successfully parsed file:', filename);
-    return {
-      filename,
-      data
-    };
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const data = JSON.parse(content);
+      return { filename, data };
+    } catch (err) {
+      console.error('FileService: Error reading file:', err);
+      return null;
+    }
+  }
+
+  static async saveResponseFile(filename: string, data: Record<string, any>): Promise<void> {
+    this.initialize();
+    console.log('FileService: Saving response file:', filename);
+    const filePath = path.join(RESPONSES_DIR, filename);
+    console.log('FileService: Full file path:', filePath);
+
+    try {
+      const content = JSON.stringify(data, null, 2);
+      fs.writeFileSync(filePath, content, 'utf-8');
+      console.log('FileService: File saved successfully');
+    } catch (err) {
+      console.error('FileService: Error saving file:', err);
+      throw err;
+    }
   }
 } 

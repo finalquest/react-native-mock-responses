@@ -1,98 +1,102 @@
-import React, { useEffect, useState } from 'react'
-import { ResponseFile } from './types/response'
+import React, { useState, useEffect } from 'react'
 import { FileDrawer } from './components/FileDrawer'
 import { DrawerToggle } from './components/DrawerToggle'
 import { EndpointList } from './components/EndpointList'
 import { EndpointDetails } from './components/EndpointDetails'
+import { ResponseFile } from './types/response'
 
 declare global {
   interface Window {
     api: {
-      getResponseFiles: () => Promise<ResponseFile[]>
-      getResponseFile: (filename: string) => Promise<ResponseFile | null>
+      getResponseFiles(): Promise<ResponseFile[]>
+      getResponseFile(filename: string): Promise<ResponseFile | null>
+      saveResponseFile(data: { filename: string; data: Record<string, any> }): Promise<void>
     }
   }
 }
 
 function App() {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [responses, setResponses] = useState<ResponseFile[]>([])
   const [selectedResponse, setSelectedResponse] = useState<ResponseFile | null>(null)
   const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(true)
 
   useEffect(() => {
-    const loadResponses = async () => {
+    const fetchResponses = async () => {
       try {
-        const files = await window.api.getResponseFiles()
-        if (files.length > 0) {
-          setResponses(files)
-          setSelectedResponse(files[0])
-        }
+        const result = await window.api.getResponseFiles()
+        setResponses(result)
       } catch (error) {
-        console.error('Error loading responses:', error)
-      } finally {
-        setLoading(false)
+        console.error('Error fetching responses:', error)
       }
     }
-
-    loadResponses()
+    fetchResponses()
   }, [])
 
-  const handleResponseClick = async (filename: string) => {
-    try {
-      const response = await window.api.getResponseFile(filename)
-      if (response) {
-        setSelectedResponse(response)
-        setSelectedEndpoint(null)
-      }
-    } catch (error) {
-      console.error('Error loading response:', error)
-    }
+  const handleResponseClick = (filename: string) => {
+    const response = responses.find(r => r.filename === filename)
+    setSelectedResponse(response || null)
+    setSelectedEndpoint(null)
   }
 
   const handleEndpointClick = (endpoint: string) => {
     setSelectedEndpoint(endpoint)
   }
 
-  const toggleDrawer = () => {
-    setIsDrawerOpen(!isDrawerOpen)
-  }
+  const handleUpdateEndpoint = async (updatedEndpoint: any) => {
+    if (!selectedResponse || !selectedEndpoint) return
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen bg-black text-white">Loading...</div>
+    const updatedResponse = {
+      ...selectedResponse,
+      data: {
+        ...selectedResponse.data,
+        [selectedEndpoint]: updatedEndpoint
+      }
+    }
+
+    try {
+      await window.api.saveResponseFile({
+        filename: selectedResponse.filename,
+        data: updatedResponse.data
+      })
+      setSelectedResponse(updatedResponse)
+      setResponses(prevResponses =>
+        prevResponses.map(response =>
+          response.filename === selectedResponse.filename ? updatedResponse : response
+        )
+      )
+    } catch (error) {
+      console.error('Error updating endpoint:', error)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
+    <div className="flex h-screen bg-black">
       <FileDrawer
         isOpen={isDrawerOpen}
         responses={responses}
         selectedResponse={selectedResponse}
         onResponseClick={handleResponseClick}
       />
-
-      <DrawerToggle isOpen={isDrawerOpen} onToggle={toggleDrawer} />
-
-      <div className={`
-        flex-1 transition-all duration-300 ease-in-out
-        ${isDrawerOpen ? 'ml-64' : 'ml-0'}
-      `}>
-        <h1 className="text-2xl font-bold p-4">Mock API Admin Panel</h1>
-
-        <div className="flex flex-col lg:flex-row h-[calc(100vh-5rem)]">
-          <EndpointList
-            selectedResponse={selectedResponse}
-            selectedEndpoint={selectedEndpoint}
-            onEndpointClick={handleEndpointClick}
-          />
-
-          <div className="flex-1 overflow-y-auto">
-            <EndpointDetails
-              selectedResponse={selectedResponse}
-              selectedEndpoint={selectedEndpoint}
-            />
-          </div>
+      <div className="flex-1 flex flex-col">
+        <DrawerToggle isOpen={isDrawerOpen} onToggle={() => setIsDrawerOpen(!isDrawerOpen)} />
+        <div className="flex flex-1">
+          {selectedResponse && (
+            <>
+              <EndpointList
+                selectedResponse={selectedResponse}
+                selectedEndpoint={selectedEndpoint}
+                onEndpointClick={handleEndpointClick}
+              />
+              {selectedEndpoint && (
+                <EndpointDetails
+                  selectedResponse={selectedResponse}
+                  selectedEndpoint={selectedEndpoint}
+                  onUpdateEndpoint={handleUpdateEndpoint}
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

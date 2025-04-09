@@ -31,6 +31,17 @@ function setupIpcHandlers() {
       throw error
     }
   })
+
+  ipcMain.handle('save-response-file', async (_, data: { filename: string; data: Record<string, any> }) => {
+    console.log(`Main: save-response-file handler called with filename: ${data.filename}`)
+    try {
+      await FileService.saveResponseFile(data.filename, data.data)
+      console.log(`Main: Response file ${data.filename} saved successfully`)
+    } catch (error) {
+      console.error('Main: Error in save-response-file handler:', error)
+      throw error
+    }
+  })
 }
 
 const createWindow = () => {

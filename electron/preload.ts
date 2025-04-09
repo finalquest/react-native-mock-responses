@@ -28,6 +28,16 @@ contextBridge.exposeInMainWorld(
         console.error('Preload: getResponseFile error:', error)
         throw error
       }
+    },
+    saveResponseFile: async (data: { filename: string; data: Record<string, any> }): Promise<void> => {
+      console.log('Preload: saveResponseFile called with data:', data)
+      try {
+        await ipcRenderer.invoke('save-response-file', data)
+        console.log('Preload: saveResponseFile successful')
+      } catch (error) {
+        console.error('Preload: saveResponseFile error:', error)
+        throw error
+      }
     }
   }
 ) 
