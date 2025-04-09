@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FileDrawer } from './components/FileDrawer'
 import { DrawerToggle } from './components/DrawerToggle'
-import { EndpointList } from './components/EndpointList'
-import { EndpointDetails } from './components/EndpointDetails'
 import { DeviceSelector } from './components/DeviceSelector'
 import { InstalledApps } from './components/InstalledApps'
 import { ResponseActions } from './components/ResponseActions'
 import { EndpointsPanel } from './components/EndpointsPanel'
+import { MainPanel } from './components/MainPanel'
 import { ResponseFile } from './types/response'
 
 declare global {
@@ -31,9 +30,6 @@ function App() {
   const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null)
   const [selectedApp, setSelectedApp] = useState<{ packageName: string; appName: string } | null>(null)
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null)
-  const [endpointPanelWidth, setEndpointPanelWidth] = useState(300)
-  const [isResizing, setIsResizing] = useState(false)
-  const endpointPanelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const fetchResponses = async () => {
@@ -114,33 +110,6 @@ function App() {
     setSelectedDevice(deviceId)
   }
 
-  const startResizing = (e: React.MouseEvent) => {
-    setIsResizing(true)
-    e.preventDefault()
-  }
-
-  const stopResizing = () => {
-    setIsResizing(false)
-  }
-
-  const resize = (e: MouseEvent) => {
-    if (isResizing && endpointPanelRef.current) {
-      const newWidth = e.clientX - endpointPanelRef.current.getBoundingClientRect().left
-      if (newWidth >= 200 && newWidth <= 500) {
-        setEndpointPanelWidth(newWidth)
-      }
-    }
-  }
-
-  useEffect(() => {
-    window.addEventListener('mousemove', resize)
-    window.addEventListener('mouseup', stopResizing)
-    return () => {
-      window.removeEventListener('mousemove', resize)
-      window.removeEventListener('mouseup', stopResizing)
-    }
-  }, [isResizing])
-
   return (
     <div className="flex h-screen bg-black">
       <FileDrawer
@@ -174,19 +143,16 @@ function App() {
             selectedEndpoint={selectedEndpoint}
             onEndpointClick={setSelectedEndpoint}
           />
-          <div className="flex-1 overflow-y-auto">
-            {selectedResponse && selectedEndpoint && (
-              <EndpointDetails
-                selectedResponse={selectedResponse}
-                selectedEndpoint={selectedEndpoint}
-                onUpdateEndpoint={handleUpdateEndpoint}
-              />
-            )}
-          </div>
+          <MainPanel
+            selectedResponse={selectedResponse}
+            selectedEndpoint={selectedEndpoint}
+            onEndpointClick={setSelectedEndpoint}
+            onUpdateEndpoint={handleUpdateEndpoint}
+          />
         </div>
       </div>
     </div>
   )
 }
 
-export default App 
+export default App
