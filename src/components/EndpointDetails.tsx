@@ -8,19 +8,21 @@ interface EndpointDetailsProps {
   selectedResponse: ResponseFile | null
   selectedEndpoint: string | null
   onUpdateEndpoint: (updatedEndpoint: any) => void
+  isDarkMode: boolean
 }
 
 export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
   selectedResponse,
   selectedEndpoint,
   onUpdateEndpoint,
+  isDarkMode
 }) => {
   const [activeTab, setActiveTab] = useState<'headers' | 'body'>('headers')
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   if (!selectedEndpoint || !selectedResponse) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-400">
+      <div className={`flex items-center justify-center h-full ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
         Select an endpoint from the left to view details
       </div>
     )
@@ -29,7 +31,7 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
   const endpointData = selectedResponse.data[selectedEndpoint]
   if (!endpointData) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-400">
+      <div className={`flex items-center justify-center h-full ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
         No data found for this endpoint
       </div>
     )
@@ -52,7 +54,7 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
   }
 
   return (
-    <div className="p-4 h-full flex flex-col">
+    <div className={`p-4 h-full flex flex-col ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-mono">
           {selectedEndpoint}
@@ -66,14 +68,18 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
         </div>
       </div>
 
-      <div className="bg-gray-900 rounded-lg overflow-hidden flex-1 flex flex-col">
-        <div className="border-b border-gray-800">
+      <div className={`flex-1 flex flex-col rounded-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+        <div className={`border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           <button 
             onClick={() => setActiveTab('headers')}
             className={`px-4 py-2 ${
               activeTab === 'headers' 
-                ? 'bg-gray-800 text-white' 
-                : 'text-gray-400 hover:text-white'
+                ? isDarkMode
+                  ? 'bg-gray-700 text-white'
+                  : 'bg-gray-100 text-gray-900'
+                : isDarkMode
+                  ? 'text-gray-400 hover:text-white'
+                  : 'text-gray-500 hover:text-gray-900'
             }`}
           >
             Headers
@@ -82,8 +88,12 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
             onClick={() => setActiveTab('body')}
             className={`px-4 py-2 ${
               activeTab === 'body' 
-                ? 'bg-gray-800 text-white' 
-                : 'text-gray-400 hover:text-white'
+                ? isDarkMode
+                  ? 'bg-gray-700 text-white'
+                  : 'bg-gray-100 text-gray-900'
+                : isDarkMode
+                  ? 'text-gray-400 hover:text-white'
+                  : 'text-gray-500 hover:text-gray-900'
             }`}
           >
             Body
@@ -93,7 +103,7 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
         <div className="p-4 font-mono text-sm flex-1 flex flex-col">
           {activeTab === 'headers' ? (
             <div className="flex-1 flex flex-col">
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Headers
               </label>
               <div className="flex-1 relative">
@@ -124,7 +134,7 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
             </div>
           ) : (
             <div className="flex-1 flex flex-col">
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Body
               </label>
               <div className="flex-1 relative">
@@ -162,6 +172,7 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
         onClose={() => setIsEditModalOpen(false)}
         onSave={activeTab === 'headers' ? handleSaveHeaders : handleSaveBody}
         initialBody={activeTab === 'headers' ? endpointData.headers : endpointData.body}
+        isDarkMode={isDarkMode}
       />
     </div>
   )

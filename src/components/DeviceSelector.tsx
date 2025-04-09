@@ -3,11 +3,10 @@ import { useClickOutside } from '../hooks/useClickOutside'
 
 interface DeviceSelectorProps {
   onDeviceSelect: (deviceId: string) => void
+  isDarkMode: boolean
 }
 
-export const DeviceSelector: React.FC<DeviceSelectorProps> = ({
-  onDeviceSelect
-}) => {
+export const DeviceSelector: React.FC<DeviceSelectorProps> = ({ onDeviceSelect, isDarkMode }) => {
   const [devices, setDevices] = useState<string[]>([])
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -42,7 +41,11 @@ export const DeviceSelector: React.FC<DeviceSelectorProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
+        className={`flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-200 ${
+          isDarkMode
+            ? 'bg-gray-700 text-gray-100 border-gray-600'
+            : 'bg-white text-gray-800 border-gray-200'
+        }`}
       >
         <span>{selectedDevice || 'Select Device'}</span>
         <svg
@@ -61,7 +64,9 @@ export const DeviceSelector: React.FC<DeviceSelectorProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-64 bg-gray-800 rounded shadow-lg z-10">
+        <div className={`absolute top-full left-0 mt-1 w-64 rounded shadow-lg z-10 ${
+          isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
+        }`}>
           {devices.map((device) => (
             <button
               key={device}
@@ -69,7 +74,9 @@ export const DeviceSelector: React.FC<DeviceSelectorProps> = ({
               className={`block w-full px-4 py-2 text-left ${
                 selectedDevice === device
                   ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-700'
+                  : isDarkMode
+                  ? 'text-gray-100 hover:bg-gray-600'
+                  : 'text-gray-800 hover:bg-gray-100'
               }`}
             >
               <div className="truncate" title={device}>

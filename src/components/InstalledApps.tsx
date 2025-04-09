@@ -9,9 +9,10 @@ interface InstalledApp {
 interface InstalledAppsProps {
   deviceId: string | null
   onAppSelect: (app: InstalledApp) => void
+  isDarkMode: boolean
 }
 
-export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSelect }) => {
+export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSelect, isDarkMode }) => {
   const [apps, setApps] = useState<InstalledApp[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [selectedApp, setSelectedApp] = useState<InstalledApp | null>(null)
@@ -42,7 +43,11 @@ export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSel
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
+        className={`flex items-center gap-2 px-4 py-2 rounded hover:bg-gray-200 ${
+          isDarkMode
+            ? 'bg-gray-700 text-gray-100 border-gray-600'
+            : 'bg-white text-gray-800 border-gray-200'
+        }`}
         disabled={!deviceId}
       >
         <span>{selectedApp?.appName || 'Select App'}</span>
@@ -61,7 +66,9 @@ export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSel
         </svg>
       </button>
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-64 bg-gray-800 rounded shadow-lg z-10">
+        <div className={`absolute top-full left-0 mt-1 w-64 rounded shadow-lg z-10 ${
+          isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
+        }`}>
           {apps.map((app) => (
             <button
               key={app.packageName}
@@ -69,7 +76,9 @@ export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSel
               className={`block w-full px-4 py-2 text-left ${
                 selectedApp?.packageName === app.packageName
                   ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-700'
+                  : isDarkMode
+                  ? 'text-gray-100 hover:bg-gray-600'
+                  : 'text-gray-800 hover:bg-gray-100'
               }`}
             >
               <div className="truncate" title={`${app.appName} (${app.packageName})`}>

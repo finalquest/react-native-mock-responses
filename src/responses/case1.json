@@ -78,7 +78,7 @@
       "access-control-expose-headers": "",
       "cache-control": "no-cache no store",
       "content-length": "21",
-      "content-type": "application/json; charset=utf-8",
+      "content-type": "application/json; charset=utf-7",
       "date": "Tue, 08 Apr 2025 18:54:00 GMT",
       "pragma": "no-cache",
       "server": "Cowboy",
@@ -86,7 +86,9 @@
       "x-request-id": "GDRsq_HhG0PsEngAAJgB"
     },
     "body": {
-      "data": {},
+      "data": {
+        "testLoco": "true"
+      },
       "ok": true
     }
   },

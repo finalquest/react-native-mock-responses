@@ -3,15 +3,19 @@ import React from 'react'
 interface DrawerToggleProps {
   isOpen: boolean
   onToggle: () => void
+  isDarkMode: boolean
 }
 
-export const DrawerToggle: React.FC<DrawerToggleProps> = ({ isOpen, onToggle }) => {
+export const DrawerToggle: React.FC<DrawerToggleProps> = ({ isOpen, onToggle, isDarkMode }) => {
   return (
     <button
       onClick={onToggle}
       className={`
-        fixed top-4 left-0 z-20 p-2 bg-gray-800 hover:bg-gray-700
-        rounded-r transition-all duration-300 ease-in-out
+        fixed top-4 left-0 z-20 p-2 rounded-r transition-all duration-300 ease-in-out
+        ${isDarkMode 
+          ? 'bg-gray-700 hover:bg-gray-600 text-gray-100' 
+          : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-200'
+        }
         ${isOpen ? 'left-64' : 'left-0'}
       `}
     >

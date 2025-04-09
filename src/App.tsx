@@ -25,11 +25,13 @@ declare global {
 
 function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(true)
   const [responses, setResponses] = useState<ResponseFile[]>([])
   const [selectedResponse, setSelectedResponse] = useState<ResponseFile | null>(null)
   const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null)
   const [selectedApp, setSelectedApp] = useState<{ packageName: string; appName: string } | null>(null)
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null)
+  const [devices, setDevices] = useState<string[]>([])
 
   useEffect(() => {
     const fetchResponses = async () => {
@@ -42,6 +44,22 @@ function App() {
     }
     fetchResponses()
   }, [])
+
+  useEffect(() => {
+    const fetchDevices = async () => {
+      try {
+        const result = await window.api.getConnectedDevices()
+        setDevices(result)
+      } catch (error) {
+        console.error('Error fetching devices:', error)
+      }
+    }
+    fetchDevices()
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDarkMode)
+  }, [isDarkMode])
 
   const handleResponseClick = (filename: string) => {
     const response = responses.find((r) => r.filename === filename)
@@ -114,23 +132,25 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen bg-black">
+    <div className={`flex h-screen ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
       <FileDrawer
         isOpen={isDrawerOpen}
         responses={responses}
         selectedResponse={selectedResponse}
         onResponseClick={handleResponseClick}
+        isDarkMode={isDarkMode}
       />
       <div className="flex-1 flex flex-col">
-        <div className="flex flex-col p-4 border-b border-gray-700">
+        <div className={`flex flex-col p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="flex items-center justify-between">
-            <DrawerToggle
-              isOpen={isDrawerOpen}
-              onToggle={() => setIsDrawerOpen(!isDrawerOpen)}
-            />
-            <div className="flex items-center gap-4">
-              <DeviceSelector onDeviceSelect={handleDeviceSelect} />
-              <InstalledApps deviceId={selectedDevice} onAppSelect={handleAppSelect} />
+            <div className="flex items-center gap-4 pl-8">
+              <DrawerToggle
+                isOpen={isDrawerOpen}
+                onToggle={() => setIsDrawerOpen(!isDrawerOpen)}
+                isDarkMode={isDarkMode}
+              />
+              <DeviceSelector onDeviceSelect={handleDeviceSelect} isDarkMode={isDarkMode} />
+              <InstalledApps deviceId={selectedDevice} onAppSelect={handleAppSelect} isDarkMode={isDarkMode} />
               <ResponseActions
                 deviceId={selectedDevice}
                 selectedApp={selectedApp}
@@ -138,6 +158,20 @@ function App() {
                 onPushResponses={handlePushResponses}
               />
             </div>
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className={`p-2 rounded-full ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-200'}`}
+            >
+              {isDarkMode ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
         <div className="flex-1 flex overflow-hidden">
@@ -145,12 +179,14 @@ function App() {
             selectedResponse={selectedResponse}
             selectedEndpoint={selectedEndpoint}
             onEndpointClick={setSelectedEndpoint}
+            isDarkMode={isDarkMode}
           />
           <MainPanel
             selectedResponse={selectedResponse}
             selectedEndpoint={selectedEndpoint}
             onEndpointClick={setSelectedEndpoint}
             onUpdateEndpoint={handleUpdateEndpoint}
+            isDarkMode={isDarkMode}
           />
         </div>
       </div>

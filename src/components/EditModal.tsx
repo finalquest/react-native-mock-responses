@@ -5,6 +5,7 @@ interface EditModalProps {
   onClose: () => void
   onSave: (body: any) => void
   initialBody: any
+  isDarkMode: boolean
 }
 
 interface JSONError {
@@ -19,6 +20,7 @@ export const EditModal: React.FC<EditModalProps> = ({
   onClose,
   onSave,
   initialBody,
+  isDarkMode
 }) => {
   const [body, setBody] = useState(JSON.stringify(initialBody, null, 2))
   const [error, setError] = useState<JSONError | null>(null)
@@ -141,19 +143,19 @@ export const EditModal: React.FC<EditModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-lg p-6 w-3/4 h-3/4 flex flex-col">
+      <div className={`rounded-lg p-6 w-3/4 h-3/4 flex flex-col ${isDarkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Edit JSON</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white"
+            className={`${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
           >
             ✕
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-500 bg-opacity-20 border border-red-500 rounded text-red-500">
+          <div className={`mb-4 p-3 rounded ${isDarkMode ? 'bg-red-500 bg-opacity-20 border border-red-500 text-red-500' : 'bg-red-100 border border-red-200 text-red-700'}`}>
             <div className="font-bold">JSON Error:</div>
             <div>{error.message}</div>
             <div className="text-sm mt-1">
@@ -168,7 +170,11 @@ export const EditModal: React.FC<EditModalProps> = ({
             value={body}
             onChange={handleBodyChange}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart)}
-            className="w-full h-full p-2 font-mono text-sm bg-gray-900 text-gray-200 border border-gray-700 rounded"
+            className={`w-full h-full p-2 font-mono text-sm rounded ${
+              isDarkMode 
+                ? 'bg-gray-900 border-gray-700 text-gray-100' 
+                : 'bg-gray-50 border-gray-200 text-gray-900'
+            }`}
             style={{ 
               resize: 'none',
               outline: 'none',
@@ -192,7 +198,11 @@ export const EditModal: React.FC<EditModalProps> = ({
         <div className="flex justify-end gap-2 mt-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
+            className={`px-4 py-2 rounded ${
+              isDarkMode 
+                ? 'bg-gray-700 hover:bg-gray-600' 
+                : 'bg-gray-200 hover:bg-gray-300'
+            }`}
           >
             Cancel
           </button>
@@ -201,8 +211,10 @@ export const EditModal: React.FC<EditModalProps> = ({
             disabled={!isValid}
             className={`px-4 py-2 rounded ${
               isValid 
-                ? 'bg-blue-600 hover:bg-blue-500' 
-                : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                ? 'bg-blue-600 hover:bg-blue-500 text-white' 
+                : isDarkMode
+                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
             Save
