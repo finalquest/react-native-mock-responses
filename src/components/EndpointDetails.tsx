@@ -42,7 +42,7 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-mono">
           {selectedEndpoint}
@@ -62,7 +62,7 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
         </div>
       </div>
 
-      <div className="bg-gray-900 rounded-lg overflow-hidden">
+      <div className="bg-gray-900 rounded-lg overflow-hidden flex-1 flex flex-col">
         <div className="border-b border-gray-800">
           <button 
             onClick={() => setActiveTab('headers')}
@@ -86,18 +86,53 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
           </button>
         </div>
 
-        <div className="p-4 font-mono text-sm">
+        <div className="p-4 font-mono text-sm flex-1 flex flex-col">
           {activeTab === 'headers' ? (
-            Object.entries(endpointData.headers).map(([key, value]) => (
-              <div key={key} className="py-1">
-                <span className="text-gray-400">{key}:</span>{' '}
-                <span>{value as string}</span>
-              </div>
-            ))
+            <div className="flex-1 flex flex-col">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Headers
+              </label>
+              <textarea
+                value={JSON.stringify(
+                  selectedResponse.data[selectedEndpoint].headers,
+                  null,
+                  2
+                )}
+                onChange={(e) => {
+                  try {
+                    const headers = JSON.parse(e.target.value)
+                    onUpdateEndpoint({
+                      ...selectedResponse.data[selectedEndpoint],
+                      headers,
+                    })
+                  } catch (error) {
+                    console.error('Invalid JSON:', error)
+                  }
+                }}
+                className="flex-1 w-full p-2 rounded bg-gray-800 border border-gray-700 text-white font-mono whitespace-nowrap overflow-x-auto"
+              />
+            </div>
           ) : (
-            <pre className="whitespace-pre-wrap">
-              {JSON.stringify(endpointData.body, null, 2)}
-            </pre>
+            <div className="flex-1 flex flex-col">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Body
+              </label>
+              <textarea
+                value={JSON.stringify(endpointData.body, null, 2)}
+                onChange={(e) => {
+                  try {
+                    const body = JSON.parse(e.target.value)
+                    onUpdateEndpoint({
+                      ...endpointData,
+                      body,
+                    })
+                  } catch (error) {
+                    console.error('Invalid JSON:', error)
+                  }
+                }}
+                className="flex-1 w-full p-2 rounded bg-gray-800 border border-gray-700 text-white font-mono whitespace-nowrap overflow-x-auto"
+              />
+            </div>
           )}
         </div>
       </div>
