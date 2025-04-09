@@ -57,6 +57,18 @@ function setupIpcHandlers() {
     }
   })
 
+  ipcMain.handle('get-installed-apps', async (_, deviceId: string) => {
+    console.log(`Main: get-installed-apps handler called for device: ${deviceId}`)
+    try {
+      const apps = await AdbService.getInstalledApps(deviceId)
+      console.log(`Main: Found ${apps.length} installed apps`)
+      return apps
+    } catch (error) {
+      console.error('Main: Error in get-installed-apps handler:', error)
+      throw error
+    }
+  })
+
   ipcMain.handle('pull-responses', async (_, deviceId: string) => {
     console.log(`Main: pull-responses handler called for device: ${deviceId}`)
     try {

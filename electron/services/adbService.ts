@@ -8,6 +8,11 @@ const execAsync = promisify(exec)
 const PROJECT_ROOT = app.getAppPath()
 const RESPONSES_DIR = path.join(PROJECT_ROOT, 'src', 'responses')
 
+interface InstalledApp {
+  packageName: string
+  appName: string
+}
+
 export class AdbService {
   private static async runAdbCommand(command: string): Promise<string> {
     try {
@@ -29,6 +34,44 @@ export class AdbService {
       .slice(1) // Skip the first line (header)
       .filter(line => line.trim() && !line.includes('offline'))
       .map(line => line.split('\t')[0])
+  }
+
+  public static async getInstalledApps(deviceId: string): Promise<InstalledApp[]> {
+    console.log(`Getting installed apps for device ${deviceId}`)
+    
+    // Get all packages
+    const packagesOutput = await this.runAdbCommand(`adb -s ${deviceId} shell pm list packages -3`)
+    const packageNames = packagesOutput
+      .split('\n')
+      .filter(line => line.startsWith('package:'))
+      .map(line => line.replace('package:', '').trim())
+
+    // Get app names for each package
+    const apps: InstalledApp[] = []
+    for (const packageName of packageNames) {
+      try {
+        const appNameOutput = await this.runAdbCommand(
+          `adb -s ${deviceId} shell dumpsys package ${packageName} | grep "application-label:"`
+        )
+        const appName = appNameOutput
+          .split('\n')[0]
+          ?.replace('application-label:', '')
+          ?.trim() || packageName
+
+        apps.push({
+          packageName,
+          appName
+        })
+      } catch (err) {
+        console.error(`Error getting app name for ${packageName}:`, err)
+        apps.push({
+          packageName,
+          appName: packageName
+        })
+      }
+    }
+
+    return apps.sort((a, b) => a.appName.localeCompare(b.appName))
   }
 
   public static async pullResponses(deviceId: string): Promise<void> {

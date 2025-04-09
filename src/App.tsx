@@ -4,6 +4,7 @@ import { DrawerToggle } from './components/DrawerToggle'
 import { EndpointList } from './components/EndpointList'
 import { EndpointDetails } from './components/EndpointDetails'
 import { DeviceSelector } from './components/DeviceSelector'
+import { InstalledApps } from './components/InstalledApps'
 import { ResponseFile } from './types/response'
 
 declare global {
@@ -16,6 +17,7 @@ declare global {
       pullResponses(deviceId: string): Promise<ResponseFile[]>
       pushResponses(deviceId: string): Promise<void>
       restartApp(deviceId: string): Promise<void>
+      getInstalledApps(deviceId: string): Promise<{ packageName: string; appName: string }[]>
     }
   }
 }
@@ -104,28 +106,36 @@ function App() {
         onResponseClick={handleResponseClick}
       />
       <div className="flex-1 flex flex-col">
-        <DeviceSelector
-          onPullResponses={handlePullResponses}
-          onPushResponses={handlePushResponses}
-        />
-        <DrawerToggle isOpen={isDrawerOpen} onToggle={() => setIsDrawerOpen(!isDrawerOpen)} />
-        <div className="flex flex-1">
-          {selectedResponse && (
-            <>
+            <DrawerToggle
+              isOpen={isDrawerOpen}
+              onToggle={() => setIsDrawerOpen(!isDrawerOpen)}
+            />
+            <DeviceSelector
+              onPullResponses={handlePullResponses}
+              onPushResponses={handlePushResponses}
+            />
+          <div className="mt-2">
+            <InstalledApps />
+          </div>
+        <div className="flex-1 flex overflow-hidden">
+          <div className="w-1/3 border-r border-gray-700 overflow-y-auto">
+            {selectedResponse && (
               <EndpointList
                 selectedResponse={selectedResponse}
                 selectedEndpoint={selectedEndpoint}
                 onEndpointClick={handleEndpointClick}
               />
-              {selectedEndpoint && (
-                <EndpointDetails
-                  selectedResponse={selectedResponse}
-                  selectedEndpoint={selectedEndpoint}
-                  onUpdateEndpoint={handleUpdateEndpoint}
-                />
-              )}
-            </>
-          )}
+            )}
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {selectedResponse && selectedEndpoint && (
+              <EndpointDetails
+                selectedResponse={selectedResponse}
+                selectedEndpoint={selectedEndpoint}
+                onUpdateEndpoint={handleUpdateEndpoint}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

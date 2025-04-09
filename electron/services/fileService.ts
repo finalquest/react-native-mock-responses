@@ -51,27 +51,25 @@ export class FileService {
         .map(file => {
           try {
             const filePath = path.join(RESPONSES_DIR, file);
-            console.log('Reading file:', filePath);
-            
-            const content = fs.readFileSync(filePath, 'utf-8');
-            console.log(`File ${file} content length:`, content.length);
-            
-            const parsed = JSON.parse(content);
+            console.log(`Reading file: ${filePath}`);
+            const content = fs.readFileSync(filePath, 'utf8');
+            const data = JSON.parse(content);
+            console.log(`Successfully parsed file: ${file}`);
             return {
               filename: file,
-              data: parsed
-            } as ResponseFile;
-          } catch (err) {
-            console.error(`Error processing file ${file}:`, err);
+              data: data
+            };
+          } catch (error) {
+            console.error(`Error reading file ${file}:`, error);
             return null;
           }
         })
         .filter((file): file is ResponseFile => file !== null);
 
-      console.log('Processed response files count:', responseFiles.length);
+      console.log('Processed response files:', responseFiles);
       return responseFiles;
-    } catch (err) {
-      console.error('Error in getResponseFiles:', err);
+    } catch (error) {
+      console.error('Error in getResponseFiles:', error);
       return [];
     }
   }
