@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 interface EditModalProps {
   isOpen: boolean
@@ -20,11 +20,12 @@ export const EditModal: React.FC<EditModalProps> = ({
   onSave,
   initialBody,
 }) => {
-  const [body, setBody] = useState(() => JSON.stringify(initialBody, null, 2))
+  const [body, setBody] = useState(JSON.stringify(initialBody, null, 2))
   const [error, setError] = useState<JSONError | null>(null)
   const [isValid, setIsValid] = useState(true)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [cursorPosition, setCursorPosition] = useState(0)
 
-  // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setBody(JSON.stringify(initialBody, null, 2))
@@ -32,6 +33,13 @@ export const EditModal: React.FC<EditModalProps> = ({
       setIsValid(true)
     }
   }, [isOpen, initialBody])
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.selectionStart = cursorPosition
+      textareaRef.current.selectionEnd = cursorPosition
+    }
+  }, [cursorPosition])
 
   const findErrorPosition = (jsonString: string, position: number): { line: number; column: number } => {
     const lines = jsonString.split('\n')
@@ -81,6 +89,7 @@ export const EditModal: React.FC<EditModalProps> = ({
   const handleBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newBody = e.target.value
     setBody(newBody)
+    setCursorPosition(e.target.selectionStart)
     
     if (newBody.trim() === '') {
       setError({
@@ -132,57 +141,58 @@ export const EditModal: React.FC<EditModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-900 rounded-lg w-full max-w-3xl mx-4">
-        <div className="border-b border-gray-800 p-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold">Edit Response Body</h2>
-          <button 
+      <div className="bg-gray-800 rounded-lg p-6 w-3/4 h-3/4 flex flex-col">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Edit JSON</h2>
+          <button
             onClick={onClose}
             className="text-gray-400 hover:text-white"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            ✕
           </button>
         </div>
-        
-        <div className="p-4">
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-500 bg-opacity-20 border border-red-500 rounded text-red-500">
+            <div className="font-bold">JSON Error:</div>
+            <div>{error.message}</div>
+            <div className="text-sm mt-1">
+              Line: {error.line}, Column: {error.column}
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 relative">
+          <textarea
+            ref={textareaRef}
+            value={body}
+            onChange={handleBodyChange}
+            onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart)}
+            className="w-full h-full p-2 font-mono text-sm bg-gray-900 text-gray-200 border border-gray-700 rounded"
+            style={{ 
+              resize: 'none',
+              outline: 'none',
+              lineHeight: '1.5',
+              tabSize: 2
+            }}
+          />
           {error && (
-            <div className="mb-4 p-3 bg-red-500 bg-opacity-20 border border-red-500 rounded text-red-500">
-              <div className="font-bold">JSON Error:</div>
-              <div>{error.message}</div>
-              <div className="text-sm mt-1">
-                Line: {error.line}, Column: {error.column}
-              </div>
+            <div 
+              className="absolute pointer-events-none"
+              style={{
+                top: `${(error.line - 1) * 1.5}rem`,
+                left: `${error.column * 0.6}rem`,
+              }}
+            >
+              <div className="w-2 h-2 bg-red-500 rounded-full" />
             </div>
           )}
-          
-          <div className="relative">
-            <textarea
-              value={body}
-              onChange={handleBodyChange}
-              className={`w-full h-96 bg-black rounded p-4 font-mono text-sm focus:outline-none focus:ring-2 ${
-                isValid ? 'focus:ring-blue-500' : 'focus:ring-red-500'
-              }`}
-              spellCheck={false}
-            />
-            {error && (
-              <div 
-                className="absolute pointer-events-none"
-                style={{
-                  top: `${(error.line - 1) * 1.5}rem`,
-                  left: `${error.column * 0.6}rem`,
-                }}
-              >
-                <div className="w-2 h-2 bg-red-500 rounded-full" />
-              </div>
-            )}
-          </div>
         </div>
 
-        <div className="border-t border-gray-800 p-4 flex justify-end gap-3">
+        <div className="flex justify-end gap-2 mt-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-400 hover:text-white"
+            className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600"
           >
             Cancel
           </button>
@@ -191,11 +201,11 @@ export const EditModal: React.FC<EditModalProps> = ({
             disabled={!isValid}
             className={`px-4 py-2 rounded ${
               isValid 
-                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                ? 'bg-blue-600 hover:bg-blue-500' 
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
           >
-            Save Changes
+            Save
           </button>
         </div>
       </div>

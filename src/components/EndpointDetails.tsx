@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { ResponseFile } from '../types/response'
 import { EditModal } from './EditModal'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 interface EndpointDetailsProps {
   selectedResponse: ResponseFile | null
@@ -41,6 +43,14 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
     onUpdateEndpoint(updatedEndpoint)
   }
 
+  const handleSaveHeaders = (newHeaders: any) => {
+    const updatedEndpoint = {
+      ...endpointData,
+      headers: newHeaders
+    }
+    onUpdateEndpoint(updatedEndpoint)
+  }
+
   return (
     <div className="p-4 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
@@ -53,12 +63,6 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
           }`}>
             Status: {endpointData.status}
           </span>
-          <button 
-            onClick={() => setIsEditModalOpen(true)}
-            className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600"
-          >
-            Edit
-          </button>
         </div>
       </div>
 
@@ -92,46 +96,62 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Headers
               </label>
-              <textarea
-                value={JSON.stringify(
-                  selectedResponse.data[selectedEndpoint].headers,
-                  null,
-                  2
-                )}
-                onChange={(e) => {
-                  try {
-                    const headers = JSON.parse(e.target.value)
-                    onUpdateEndpoint({
-                      ...selectedResponse.data[selectedEndpoint],
-                      headers,
-                    })
-                  } catch (error) {
-                    console.error('Invalid JSON:', error)
-                  }
-                }}
-                className="flex-1 w-full p-2 rounded bg-gray-800 border border-gray-700 text-white font-mono whitespace-nowrap overflow-x-auto"
-              />
+              <div className="flex-1 relative">
+                <SyntaxHighlighter
+                  language="json"
+                  style={tomorrow}
+                  customStyle={{
+                    margin: 0,
+                    padding: '0.5rem',
+                    height: '100%',
+                    background: '#1a1a1a',
+                    overflow: 'auto',
+                    whiteSpace: 'pre',
+                  }}
+                  lineProps={{
+                    style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' }
+                  }}
+                >
+                  {JSON.stringify(endpointData.headers, null, 2)}
+                </SyntaxHighlighter>
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="absolute top-2 right-2 px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm"
+                >
+                  Edit
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex-1 flex flex-col">
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Body
               </label>
-              <textarea
-                value={JSON.stringify(endpointData.body, null, 2)}
-                onChange={(e) => {
-                  try {
-                    const body = JSON.parse(e.target.value)
-                    onUpdateEndpoint({
-                      ...endpointData,
-                      body,
-                    })
-                  } catch (error) {
-                    console.error('Invalid JSON:', error)
-                  }
-                }}
-                className="flex-1 w-full p-2 rounded bg-gray-800 border border-gray-700 text-white font-mono whitespace-nowrap overflow-x-auto"
-              />
+              <div className="flex-1 relative">
+                <SyntaxHighlighter
+                  language="json"
+                  style={tomorrow}
+                  customStyle={{
+                    margin: 0,
+                    padding: '0.5rem',
+                    height: '100%',
+                    background: '#1a1a1a',
+                    overflow: 'auto',
+                    whiteSpace: 'pre',
+                  }}
+                  lineProps={{
+                    style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' }
+                  }}
+                >
+                  {JSON.stringify(endpointData.body, null, 2)}
+                </SyntaxHighlighter>
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="absolute top-2 right-2 px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 text-sm"
+                >
+                  Edit
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -140,8 +160,8 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
       <EditModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        onSave={handleSaveBody}
-        initialBody={endpointData.body}
+        onSave={activeTab === 'headers' ? handleSaveHeaders : handleSaveBody}
+        initialBody={activeTab === 'headers' ? endpointData.headers : endpointData.body}
       />
     </div>
   )
