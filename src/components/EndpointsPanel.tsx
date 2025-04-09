@@ -65,7 +65,9 @@ export const EndpointsPanel: React.FC<EndpointsPanelProps> = ({
                 }`}
                 onClick={() => onEndpointClick(endpoint)}
               >
-                {endpoint}
+                <div className="truncate" title={endpoint}>
+                  {endpoint}
+                </div>
               </div>
             ))}
           </div>

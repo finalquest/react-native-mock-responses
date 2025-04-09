@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { useClickOutside } from '../hooks/useClickOutside'
 
 interface InstalledApp {
   packageName: string
@@ -12,78 +13,70 @@ interface InstalledAppsProps {
 
 export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSelect }) => {
   const [apps, setApps] = useState<InstalledApp[]>([])
-  const [selectedApp, setSelectedApp] = useState<InstalledApp | null>(null)
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [selectedApp, setSelectedApp] = useState<InstalledApp | null>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useClickOutside(dropdownRef, () => setIsOpen(false))
 
   useEffect(() => {
     const fetchApps = async () => {
-      if (!deviceId) {
-        setApps([])
-        setSelectedApp(null)
-        return
-      }
-
-      setIsLoading(true)
+      if (!deviceId) return
       try {
         const result = await window.api.getInstalledApps(deviceId)
         setApps(result)
       } catch (error) {
-        console.error('Error fetching installed apps:', error)
-        setApps([])
-      } finally {
-        setIsLoading(false)
+        console.error('Error fetching apps:', error)
       }
     }
-
     fetchApps()
-  }, [deviceId]) // Only fetch when deviceId changes
+  }, [deviceId])
 
   const handleAppSelect = (app: InstalledApp) => {
     setSelectedApp(app)
-    setIsOpen(false)
     onAppSelect(app)
+    setIsOpen(false)
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors"
-        disabled={!deviceId || isLoading}
+        className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
+        disabled={!deviceId}
       >
-        <span className="text-gray-400">Selected App:</span>
-        <div className="flex items-center gap-2">
-          <span>{isLoading ? 'Loading...' : (selectedApp?.appName || 'Select an app')}</span>
-          <svg
-            className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
+        <span>{selectedApp?.appName || 'Select App'}</span>
+        <svg
+          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
       </button>
-
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded shadow-lg z-50">
-          <div className="p-2 max-h-96 overflow-y-auto">
-            <div className="space-y-1">
-              {apps.map((app) => (
-                <div
-                  key={app.packageName}
-                  onClick={() => handleAppSelect(app)}
-                  className={`p-2 hover:bg-gray-700 rounded cursor-pointer ${
-                    selectedApp?.packageName === app.packageName ? 'bg-gray-700' : ''
-                  }`}
-                >
-                  <div className="font-medium text-white text-sm">{app.appName}</div>
-                  <div className="text-xs text-gray-400 truncate">{app.packageName}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="absolute top-full left-0 mt-1 w-64 bg-gray-800 rounded shadow-lg z-10">
+          {apps.map((app) => (
+            <button
+              key={app.packageName}
+              onClick={() => handleAppSelect(app)}
+              className={`block w-full px-4 py-2 text-left ${
+                selectedApp?.packageName === app.packageName
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              <div className="truncate" title={`${app.appName} (${app.packageName})`}>
+                {app.appName}
+              </div>
+            </button>
+          ))}
         </div>
       )}
     </div>

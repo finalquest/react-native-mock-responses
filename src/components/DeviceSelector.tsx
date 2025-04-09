@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { useClickOutside } from '../hooks/useClickOutside'
 
 interface DeviceSelectorProps {
   onDeviceSelect: (deviceId: string) => void
@@ -10,6 +11,9 @@ export const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   const [devices, setDevices] = useState<string[]>([])
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useClickOutside(dropdownRef, () => setIsOpen(false))
 
   useEffect(() => {
     const fetchDevices = async () => {
@@ -35,42 +39,44 @@ export const DeviceSelector: React.FC<DeviceSelectorProps> = ({
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors"
+        className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-700"
       >
-        <span className="text-gray-400">Device:</span>
-        <div className="flex items-center gap-2">
-          <span>{selectedDevice || 'Select a device'}</span>
-          <svg
-            className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
+        <span>{selectedDevice || 'Select Device'}</span>
+        <svg
+          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded shadow-lg z-50">
-          <div className="p-2 max-h-96 overflow-y-auto">
-            <div className="space-y-1">
-              {devices.map((device) => (
-                <div
-                  key={device}
-                  onClick={() => handleDeviceSelect(device)}
-                  className={`p-2 hover:bg-gray-700 rounded cursor-pointer ${
-                    selectedDevice === device ? 'bg-gray-700' : ''
-                  }`}
-                >
-                  <div className="font-medium text-white text-sm">{device}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="absolute top-full left-0 mt-1 w-64 bg-gray-800 rounded shadow-lg z-10">
+          {devices.map((device) => (
+            <button
+              key={device}
+              onClick={() => handleDeviceSelect(device)}
+              className={`block w-full px-4 py-2 text-left ${
+                selectedDevice === device
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              <div className="truncate" title={device}>
+                {device}
+              </div>
+            </button>
+          ))}
         </div>
       )}
     </div>

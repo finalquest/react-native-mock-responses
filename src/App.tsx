@@ -44,9 +44,12 @@ function App() {
   }, [])
 
   const handleResponseClick = (filename: string) => {
-    const response = responses.find(r => r.filename === filename)
-    setSelectedResponse(response || null)
-    setSelectedEndpoint(null)
+    const response = responses.find((r) => r.filename === filename)
+    if (response) {
+      setSelectedResponse(response)
+      setSelectedEndpoint(null)
+      setIsDrawerOpen(false)
+    }
   }
 
   const handleEndpointClick = (endpoint: string) => {
