@@ -5,6 +5,7 @@ import { EndpointList } from './components/EndpointList'
 import { EndpointDetails } from './components/EndpointDetails'
 import { DeviceSelector } from './components/DeviceSelector'
 import { InstalledApps } from './components/InstalledApps'
+import { ResponseActions } from './components/ResponseActions'
 import { ResponseFile } from './types/response'
 
 declare global {
@@ -14,7 +15,7 @@ declare global {
       getResponseFile(filename: string): Promise<ResponseFile | null>
       saveResponseFile(data: { filename: string; data: Record<string, any> }): Promise<void>
       getConnectedDevices(): Promise<string[]>
-      pullResponses(deviceId: string): Promise<ResponseFile[]>
+      pullResponses(deviceId: string, packageName: string, filename: string): Promise<ResponseFile[]>
       pushResponses(deviceId: string): Promise<void>
       restartApp(deviceId: string): Promise<void>
       getInstalledApps(deviceId: string): Promise<{ packageName: string; appName: string }[]>
@@ -27,6 +28,8 @@ function App() {
   const [responses, setResponses] = useState<ResponseFile[]>([])
   const [selectedResponse, setSelectedResponse] = useState<ResponseFile | null>(null)
   const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null)
+  const [selectedApp, setSelectedApp] = useState<{ packageName: string; appName: string } | null>(null)
+  const [selectedDevice, setSelectedDevice] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchResponses = async () => {
@@ -77,10 +80,12 @@ function App() {
     }
   }
 
-  const handlePullResponses = async (deviceId: string) => {
+  const handlePullResponses = async (deviceId: string, packageName: string, filename: string) => {
     try {
-      const updatedResponses = await window.api.pullResponses(deviceId)
-      setResponses(updatedResponses)
+      await window.api.pullResponses(deviceId, packageName, filename)
+      // Fetch all response files after pulling
+      const allResponses = await window.api.getResponseFiles()
+      setResponses(allResponses)
       setSelectedResponse(null)
       setSelectedEndpoint(null)
     } catch (error) {
@@ -97,6 +102,14 @@ function App() {
     }
   }
 
+  const handleAppSelect = (app: { packageName: string; appName: string }) => {
+    setSelectedApp(app)
+  }
+
+  const handleDeviceSelect = (deviceId: string) => {
+    setSelectedDevice(deviceId)
+  }
+
   return (
     <div className="flex h-screen bg-black">
       <FileDrawer
@@ -106,17 +119,24 @@ function App() {
         onResponseClick={handleResponseClick}
       />
       <div className="flex-1 flex flex-col">
+        <div className="flex flex-col p-4 border-b border-gray-700">
+          <div className="flex items-center justify-between">
             <DrawerToggle
               isOpen={isDrawerOpen}
               onToggle={() => setIsDrawerOpen(!isDrawerOpen)}
             />
-            <DeviceSelector
-              onPullResponses={handlePullResponses}
-              onPushResponses={handlePushResponses}
-            />
-          <div className="mt-2">
-            <InstalledApps />
+            <div className="flex items-center gap-4">
+              <DeviceSelector onDeviceSelect={handleDeviceSelect} />
+              <InstalledApps deviceId={selectedDevice} onAppSelect={handleAppSelect} />
+              <ResponseActions
+                deviceId={selectedDevice}
+                selectedApp={selectedApp}
+                onPullResponses={handlePullResponses}
+                onPushResponses={handlePushResponses}
+              />
+            </div>
           </div>
+        </div>
         <div className="flex-1 flex overflow-hidden">
           <div className="w-1/3 border-r border-gray-700 overflow-y-auto">
             {selectedResponse && (

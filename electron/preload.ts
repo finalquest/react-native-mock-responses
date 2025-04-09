@@ -11,7 +11,7 @@ contextBridge.exposeInMainWorld('api', {
   saveResponseFile: (data: { filename: string; content: any }) => ipcRenderer.invoke('save-response-file', data),
   getConnectedDevices: () => ipcRenderer.invoke('get-connected-devices'),
   getInstalledApps: (deviceId: string) => ipcRenderer.invoke('get-installed-apps', deviceId),
-  pullResponses: (deviceId: string) => ipcRenderer.invoke('pull-responses', deviceId),
+  pullResponses: (deviceId: string, packageName: string, filename: string) => ipcRenderer.invoke('pull-responses', deviceId, packageName, filename),
   pushResponses: (deviceId: string) => ipcRenderer.invoke('push-responses', deviceId),
   restartApp: (deviceId: string) => ipcRenderer.invoke('restart-app', deviceId),
   onResponsesUpdated: (callback: (files: ResponseFile[]) => void) => {

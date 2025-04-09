@@ -69,13 +69,12 @@ function setupIpcHandlers() {
     }
   })
 
-  ipcMain.handle('pull-responses', async (_, deviceId: string) => {
-    console.log(`Main: pull-responses handler called for device: ${deviceId}`)
+  ipcMain.handle('pull-responses', async (_, deviceId: string, packageName: string, filename: string) => {
+    console.log(`Main: pull-responses handler called for device: ${deviceId}, package: ${packageName}, filename: ${filename}`)
     try {
-      await AdbService.pullResponses(deviceId)
+      const files = await AdbService.pullResponses(deviceId, packageName, filename)
       console.log('Main: Responses pulled successfully')
-      // After pulling, refresh the response files
-      return await FileService.getResponseFiles()
+      return files
     } catch (error) {
       console.error('Main: Error in pull-responses handler:', error)
       throw error

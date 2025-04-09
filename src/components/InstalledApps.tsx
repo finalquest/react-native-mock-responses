@@ -1,57 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react'
 
 interface InstalledApp {
-  packageName: string;
-  appName: string;
+  packageName: string
+  appName: string
 }
 
-export const InstalledApps: React.FC = () => {
-  const [apps, setApps] = useState<InstalledApp[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedApp, setSelectedApp] = useState<InstalledApp | null>(null);
+interface InstalledAppsProps {
+  deviceId: string | null
+  onAppSelect: (app: InstalledApp) => void
+}
+
+export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSelect }) => {
+  const [apps, setApps] = useState<InstalledApp[]>([])
+  const [selectedApp, setSelectedApp] = useState<InstalledApp | null>(null)
+  const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchApps = async () => {
-      try {
-        console.log('Fetching installed apps...');
-        const devices = await window.api.getConnectedDevices();
-        console.log('Connected devices:', devices);
-
-        if (devices.length === 0) {
-          setError('No devices connected');
-          setLoading(false);
-          return;
-        }
-
-        const deviceId = devices[0]; // Use the first connected device
-        console.log('Using device:', deviceId);
-        
-        const installedApps = await window.api.getInstalledApps(deviceId);
-        console.log('Installed apps:', installedApps);
-        
-        setApps(installedApps);
-        if (installedApps.length > 0) {
-          setSelectedApp(installedApps[0]);
-        }
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching installed apps:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch installed apps');
-        setLoading(false);
+      if (!deviceId) {
+        setApps([])
+        setSelectedApp(null)
+        return
       }
-    };
 
-    fetchApps();
-  }, []);
+      setIsLoading(true)
+      try {
+        const result = await window.api.getInstalledApps(deviceId)
+        setApps(result)
+      } catch (error) {
+        console.error('Error fetching installed apps:', error)
+        setApps([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-  if (loading) {
-    return <div className="text-gray-400">Loading apps...</div>;
-  }
+    fetchApps()
+  }, [deviceId]) // Only fetch when deviceId changes
 
-  if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
+  const handleAppSelect = (app: InstalledApp) => {
+    setSelectedApp(app)
+    setIsOpen(false)
+    onAppSelect(app)
   }
 
   return (
@@ -59,10 +50,11 @@ export const InstalledApps: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors"
+        disabled={!deviceId || isLoading}
       >
         <span className="text-gray-400">Selected App:</span>
         <div className="flex items-center gap-2">
-          <span>{selectedApp?.appName || 'Select an app'}</span>
+          <span>{isLoading ? 'Loading...' : (selectedApp?.appName || 'Select an app')}</span>
           <svg
             className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
             fill="none"
@@ -81,10 +73,7 @@ export const InstalledApps: React.FC = () => {
               {apps.map((app) => (
                 <div
                   key={app.packageName}
-                  onClick={() => {
-                    setSelectedApp(app);
-                    setIsOpen(false);
-                  }}
+                  onClick={() => handleAppSelect(app)}
                   className={`p-2 hover:bg-gray-700 rounded cursor-pointer ${
                     selectedApp?.packageName === app.packageName ? 'bg-gray-700' : ''
                   }`}
@@ -98,5 +87,5 @@ export const InstalledApps: React.FC = () => {
         </div>
       )}
     </div>
-  );
-}; 
+  )
+} 
