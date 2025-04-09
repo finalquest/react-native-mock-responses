@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
 import { FileService } from './services/fileService'
+import { AdbService } from './services/adbService'
 
 // Set up IPC handlers
 function setupIpcHandlers() {
@@ -39,6 +40,54 @@ function setupIpcHandlers() {
       console.log(`Main: Response file ${data.filename} saved successfully`)
     } catch (error) {
       console.error('Main: Error in save-response-file handler:', error)
+      throw error
+    }
+  })
+
+  // ADB handlers
+  ipcMain.handle('get-connected-devices', async () => {
+    console.log('Main: get-connected-devices handler called')
+    try {
+      const devices = await AdbService.getConnectedDevices()
+      console.log(`Main: Found ${devices.length} connected devices`)
+      return devices
+    } catch (error) {
+      console.error('Main: Error in get-connected-devices handler:', error)
+      throw error
+    }
+  })
+
+  ipcMain.handle('pull-responses', async (_, deviceId: string) => {
+    console.log(`Main: pull-responses handler called for device: ${deviceId}`)
+    try {
+      await AdbService.pullResponses(deviceId)
+      console.log('Main: Responses pulled successfully')
+      // After pulling, refresh the response files
+      return await FileService.getResponseFiles()
+    } catch (error) {
+      console.error('Main: Error in pull-responses handler:', error)
+      throw error
+    }
+  })
+
+  ipcMain.handle('push-responses', async (_, deviceId: string) => {
+    console.log(`Main: push-responses handler called for device: ${deviceId}`)
+    try {
+      await AdbService.pushResponses(deviceId)
+      console.log('Main: Responses pushed successfully')
+    } catch (error) {
+      console.error('Main: Error in push-responses handler:', error)
+      throw error
+    }
+  })
+
+  ipcMain.handle('restart-app', async (_, deviceId: string) => {
+    console.log(`Main: restart-app handler called for device: ${deviceId}`)
+    try {
+      await AdbService.restartApp(deviceId)
+      console.log('Main: App restarted successfully')
+    } catch (error) {
+      console.error('Main: Error in restart-app handler:', error)
       throw error
     }
   })

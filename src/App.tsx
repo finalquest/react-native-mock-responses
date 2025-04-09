@@ -3,6 +3,7 @@ import { FileDrawer } from './components/FileDrawer'
 import { DrawerToggle } from './components/DrawerToggle'
 import { EndpointList } from './components/EndpointList'
 import { EndpointDetails } from './components/EndpointDetails'
+import { DeviceSelector } from './components/DeviceSelector'
 import { ResponseFile } from './types/response'
 
 declare global {
@@ -11,6 +12,10 @@ declare global {
       getResponseFiles(): Promise<ResponseFile[]>
       getResponseFile(filename: string): Promise<ResponseFile | null>
       saveResponseFile(data: { filename: string; data: Record<string, any> }): Promise<void>
+      getConnectedDevices(): Promise<string[]>
+      pullResponses(deviceId: string): Promise<ResponseFile[]>
+      pushResponses(deviceId: string): Promise<void>
+      restartApp(deviceId: string): Promise<void>
     }
   }
 }
@@ -70,6 +75,26 @@ function App() {
     }
   }
 
+  const handlePullResponses = async (deviceId: string) => {
+    try {
+      const updatedResponses = await window.api.pullResponses(deviceId)
+      setResponses(updatedResponses)
+      setSelectedResponse(null)
+      setSelectedEndpoint(null)
+    } catch (error) {
+      console.error('Error pulling responses:', error)
+    }
+  }
+
+  const handlePushResponses = async (deviceId: string) => {
+    try {
+      await window.api.pushResponses(deviceId)
+      await window.api.restartApp(deviceId)
+    } catch (error) {
+      console.error('Error pushing responses:', error)
+    }
+  }
+
   return (
     <div className="flex h-screen bg-black">
       <FileDrawer
@@ -79,6 +104,10 @@ function App() {
         onResponseClick={handleResponseClick}
       />
       <div className="flex-1 flex flex-col">
+        <DeviceSelector
+          onPullResponses={handlePullResponses}
+          onPushResponses={handlePushResponses}
+        />
         <DrawerToggle isOpen={isDrawerOpen} onToggle={() => setIsDrawerOpen(!isDrawerOpen)} />
         <div className="flex flex-1">
           {selectedResponse && (

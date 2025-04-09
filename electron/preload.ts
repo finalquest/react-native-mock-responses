@@ -38,6 +38,49 @@ contextBridge.exposeInMainWorld(
         console.error('Preload: saveResponseFile error:', error)
         throw error
       }
+    },
+    // ADB methods
+    getConnectedDevices: async (): Promise<string[]> => {
+      console.log('Preload: getConnectedDevices called')
+      try {
+        const result = await ipcRenderer.invoke('get-connected-devices')
+        console.log('Preload: getConnectedDevices result:', result)
+        return result
+      } catch (error) {
+        console.error('Preload: getConnectedDevices error:', error)
+        throw error
+      }
+    },
+    pullResponses: async (deviceId: string): Promise<ResponseFile[]> => {
+      console.log('Preload: pullResponses called with deviceId:', deviceId)
+      try {
+        const result = await ipcRenderer.invoke('pull-responses', deviceId)
+        console.log('Preload: pullResponses result:', result)
+        return result
+      } catch (error) {
+        console.error('Preload: pullResponses error:', error)
+        throw error
+      }
+    },
+    pushResponses: async (deviceId: string): Promise<void> => {
+      console.log('Preload: pushResponses called with deviceId:', deviceId)
+      try {
+        await ipcRenderer.invoke('push-responses', deviceId)
+        console.log('Preload: pushResponss successful')
+      } catch (error) {
+        console.error('Preload: pushResponses error:', error)
+        throw error
+      }
+    },
+    restartApp: async (deviceId: string): Promise<void> => {
+      console.log('Preload: restartApp called with deviceId:', deviceId)
+      try {
+        await ipcRenderer.invoke('restart-app', deviceId)
+        console.log('Preload: restartApp successful')
+      } catch (error) {
+        console.error('Preload: restartApp error:', error)
+        throw error
+      }
     }
   }
 ) 
