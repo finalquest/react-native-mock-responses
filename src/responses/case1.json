@@ -1,0 +1,126 @@
+{
+    "GET /api/provisions": {
+      "status": 200,
+      "statusText": "",
+      "headers": {
+        "cache-control": "max-age=0, private, must-revalidate",
+        "content-length": "1468",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Tue, 08 Apr 2025 18:54:00 GMT",
+        "server": "Cowboy",
+        "x-request-id": "20m35d7n1jmeqnpl7bubtitoi9pcdfq9"
+      },
+      "body": {
+        "ok": true,
+        "data": {
+          "webview": "https://doit-bind-fixes.pcnt.io:8025/",
+          "webbank_service": "https://doit-bind-rc.pcnt.io:8025/",
+          "webbank": "https://doit-bind-rc.pcnt.io:8025/webbank-public-web",
+          "use_queue": "24qanbch",
+          "static_url": "https://doit-bpn.nyc3.digitaloceanspaces.com/mobile/static/",
+          "sobio": "http://cpalsobio:8081",
+          "session_timeout": "60000",
+          "profile": "https://integracion-bind-2.pcnt.io:8025/webbank-public-web",
+          "platform_admin": "http://vendor-admin.pcnt.io:8180/platform-admin-web/v1",
+          "onboarding_newUserUrl": "https://doit-bind-release-candidate.pcnt.io:8035/#/newuser",
+          "onboarding_newPasswordUrl": "no se usa",
+          "onboarding_forgetUrl": "https://doit-bind-release-candidate.pcnt.io:8035/#/resetpassword",
+          "onboarding": "https://doit-bind-release-candidate.pcnt.io:8035",
+          "moonit": "https://cashmoon.pcnt.io:4040/api",
+          "moon_client_int": "int",
+          "moon_client": "https://clientapp.moonmoneyonline.com/v1",
+          "gateway": "http://localhost:8762",
+          "doit_service": "https://saint.pcnt.io:4040/",
+          "doit": "https://doit-bind-rc.pcnt.io:4040/api",
+          "deprecated": "false",
+          "ccBackend": "https://alb-prd.credicuotas.com.ar/v1/",
+          "cashmoon_admin": "http://admin.cashmoon.pcnt.io/v1",
+          "cash_bot": "http://cashmoon.pcnt.io:3001",
+          "cas_url": "https://idpre.bind.com.ar/cas",
+          "cas": "https://profileid.pcnt.io:8121/cas",
+          "auth0_domain": "nbch-qa.auth0.com",
+          "auth0_clientid": "j8oqqCYW0tZBRQ8EsWEHJ83maBmHuwjV",
+          "auth0_audience": "nbch-qa.auth0.com",
+          "api_gateway": "https://depasse.pcnt.io:8443/depasse-core-web/api/v1"
+        }
+      }
+    },
+    "GET /api/supported": {
+      "status": 200,
+      "statusText": "",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "null",
+        "access-control-expose-headers": "",
+        "cache-control": "no-cache no store",
+        "content-length": "56",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Tue, 08 Apr 2025 18:54:00 GMT",
+        "pragma": "no-cache",
+        "server": "Cowboy",
+        "vary": "Origin",
+        "x-request-id": "GDRsq_JYNofdlScAAJgh"
+      },
+      "body": {
+        "ok": true,
+        "store_urls": {
+          "android_url": "",
+          "ios_url": ""
+        }
+      }
+    },
+    "GET /api/override_strings": {
+      "status": 200,
+      "statusText": "",
+      "headers": {
+        "access-control-allow-credentials": "true",
+        "access-control-allow-origin": "null",
+        "access-control-expose-headers": "",
+        "cache-control": "no-cache no store",
+        "content-length": "21",
+        "content-type": "application/json; charset=utf-8",
+        "date": "Tue, 08 Apr 2025 18:54:00 GMT",
+        "pragma": "no-cache",
+        "server": "Cowboy",
+        "vary": "Origin",
+        "x-request-id": "GDRsq_HhG0PsEngAAJgB"
+      },
+      "body": {
+        "data": {},
+        "ok": true
+      }
+    },
+    "POST /cas/v1/tickets": {
+      "status": 201,
+      "statusText": "",
+      "headers": {
+        "accept-ranges": "bytes",
+        "connection": "Keep-Alive",
+        "content-length": "447",
+        "content-type": "text/html;charset=ISO-8859-1",
+        "date": "Tue, 08 Apr 2025 18:54:06 GMT",
+        "keep-alive": "timeout=5, max=98",
+        "location": "https://profileid.pcnt.io:8121/cas/v1/tickets/TGT-255-6hrpW6q2fiWrOxEg6oN7nC5PXEafRaUSzjCALAwdXwy1mfn2oO-bind.com.ar",
+        "server": "Apache/2.4.62 (Debian)",
+        "strict-transport-security": "max-age=63072000; includeSubdomains; preload"
+      },
+      "body": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>201 The request has been fulfilled and resulted in a new resource being created</title></head><body><h1>TGT Created</h1><form action=\"https://profileid.pcnt.io:8121/cas/v1/tickets/TGT-255-6hrpW6q2fiWrOxEg6oN7nC5PXEafRaUSzjCALAwdXwy1mfn2oO-bind.com.ar\" method=\"POST\">Service:<input type=\"text\" name=\"service\" value=\"\"><br><input type=\"submit\" value=\"Submit\"></form></body></html>"
+    },
+    "POST /cas/v1/tickets/TGT-254-3dCGPWBAdPDzKbKF1eE2nDvKaSrINsb40Ca9XeUBErdWnmTWQn-bind.com.ar": {
+      "status": 200,
+      "statusText": "",
+      "headers": {
+        "accept-ranges": "bytes",
+        "connection": "Keep-Alive",
+        "content-type": "text/plain;charset=ISO-8859-1",
+        "date": "Tue, 08 Apr 2025 18:54:02 GMT",
+        "keep-alive": "timeout=5, max=99",
+        "server": "Apache/2.4.62 (Debian)",
+        "strict-transport-security": "max-age=63072000; includeSubdomains; preload",
+        "transfer-encoding": "chunked",
+        "vary": "Accept-Encoding"
+      },
+      "body": "ST-261-ndUAPPApyzayFOjr2vl6-bind.com.ar"
+    }
+  }
+  

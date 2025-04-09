@@ -17,10 +17,26 @@ export default defineConfig({
           },
         },
       },
+      {
+        entry: 'electron/preload.ts',
+        vite: {
+          build: {
+            outDir: 'dist-electron',
+          },
+        },
+      },
     ]),
     renderer(),
   ],
   base: './',
+  css: {
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
+    },
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -29,5 +45,8 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src'),
     },
+  },
+  server: {
+    port: 5173,
   },
 }) 
