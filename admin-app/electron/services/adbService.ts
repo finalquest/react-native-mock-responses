@@ -180,18 +180,37 @@ export class AdbService {
     );
   }
 
-  public static async restartApp(deviceId: string): Promise<void> {
-    const packageName = 'ar.com.bind.bind24.qa';
-    console.log(`Restarting app ${packageName} on device ${deviceId}`);
+  public static async restartApp(
+    deviceId: string,
+    packageName: string
+  ): Promise<void> {
+    try {
+      await this.runAdbCommand(
+        `adb -s ${deviceId} shell am force-stop ${packageName}`
+      );
+      await this.runAdbCommand(
+        `adb -s ${deviceId} shell am start -n ${packageName}/.MainActivity`
+      );
+    } catch (error) {
+      console.error('Error restarting app:', error);
+      throw error;
+    }
+  }
 
-    // Force stop the app
-    await this.runAdbCommand(
-      `adb -s ${deviceId} shell am force-stop ${packageName}`
-    );
-
-    // Start the app
-    await this.runAdbCommand(
-      `adb -s ${deviceId} shell monkey -p ${packageName} -c android.intent.category.LAUNCHER 1`
-    );
+  public static async cleanFiles(
+    deviceId: string,
+    packageName: string
+  ): Promise<void> {
+    try {
+      await this.runAdbCommand(
+        `adb -s ${deviceId} shell rm -f /data/user/0/${packageName}/files/msw-mock.json`
+      );
+      console.log(
+        `Cleaned msw-mock file for package ${packageName} on device ${deviceId}`
+      );
+    } catch (error) {
+      console.error('Error cleaning files:', error);
+      throw error;
+    }
   }
 }

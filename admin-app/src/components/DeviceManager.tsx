@@ -86,7 +86,13 @@ export const DeviceManager: React.FC = () => {
 
     try {
       setLoading(true);
-      await window.api.restartApp(selectedDevice);
+      // Get the first installed app's package name
+      const packageName = installedApps[0]?.packageName;
+      if (!packageName) {
+        setError('No installed apps found');
+        return;
+      }
+      await window.api.restartApp(selectedDevice, packageName);
       setError(null);
     } catch (err) {
       setError('Failed to restart app');

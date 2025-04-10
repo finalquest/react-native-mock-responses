@@ -23,7 +23,8 @@ declare global {
         packageName: string,
         selectedFile: string
       ): Promise<void>;
-      restartApp(deviceId: string): Promise<void>;
+      restartApp(deviceId: string, packageName: string): Promise<void>;
+      cleanFiles(deviceId: string, packageName: string): Promise<void>;
     };
   }
 }

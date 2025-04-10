@@ -111,9 +111,17 @@ function App() {
   ) => {
     try {
       await window.api.pushResponses(deviceId, packageName, selectedFile);
-      await window.api.restartApp(deviceId);
+      await window.api.restartApp(deviceId, packageName);
     } catch (error) {
       console.error('Error pushing responses:', error);
+    }
+  };
+
+  const handleCleanFiles = async (deviceId: string, packageName: string) => {
+    try {
+      await window.api.cleanFiles(deviceId, packageName);
+    } catch (error) {
+      console.error('Error cleaning files:', error);
     }
   };
 
@@ -162,6 +170,7 @@ function App() {
                 selectedResponse={selectedResponse}
                 onPullResponses={handlePullResponses}
                 onPushResponses={handlePushResponses}
+                onCleanFiles={handleCleanFiles}
               />
             </div>
             <button

@@ -16,6 +16,7 @@ interface ResponseActionsProps {
     packageName: string,
     selectedFile: string
   ) => void;
+  onCleanFiles: (deviceId: string, packageName: string) => void;
 }
 
 export const ResponseActions: React.FC<ResponseActionsProps> = ({
@@ -24,9 +25,11 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   selectedResponse,
   onPullResponses,
   onPushResponses,
+  onCleanFiles,
 }) => {
   const [isPulling, setIsPulling] = useState(false);
   const [isPushing, setIsPushing] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handlePull = async (filename: string) => {
@@ -54,6 +57,16 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
     }
   };
 
+  const handleClean = async () => {
+    if (!deviceId || !selectedApp) return;
+    setIsCleaning(true);
+    try {
+      await onCleanFiles(deviceId, selectedApp.packageName);
+    } finally {
+      setIsCleaning(false);
+    }
+  };
+
   const getDefaultFilename = () => {
     if (!selectedApp) return 'responses';
     return `${selectedApp.packageName}-responses`;
@@ -76,6 +89,14 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
           className="px-3 py-1.5 text-sm text-white bg-green-600 hover:bg-green-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPushing ? 'Pushing...' : 'Push'}
+        </button>
+
+        <button
+          onClick={handleClean}
+          disabled={!deviceId || !selectedApp || isCleaning}
+          className="px-3 py-1.5 text-sm text-white bg-red-600 hover:bg-red-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isCleaning ? 'Cleaning...' : 'Clean'}
         </button>
       </div>
 

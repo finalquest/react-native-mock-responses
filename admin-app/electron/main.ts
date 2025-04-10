@@ -102,6 +102,22 @@ function setupIpcHandlers() {
   );
 
   ipcMain.handle(
+    'clean-files',
+    async (_, deviceId: string, packageName: string) => {
+      console.log(
+        `Main: clean-files handler called for device: ${deviceId}, package: ${packageName}`
+      );
+      try {
+        await AdbService.cleanFiles(deviceId, packageName);
+        console.log('Main: Files cleaned successfully');
+      } catch (error) {
+        console.error('Main: Error in clean-files handler:', error);
+        throw error;
+      }
+    }
+  );
+
+  ipcMain.handle(
     'push-responses',
     async (_, deviceId: string, packageName: string, selectedFile: string) => {
       console.log(
@@ -117,16 +133,21 @@ function setupIpcHandlers() {
     }
   );
 
-  ipcMain.handle('restart-app', async (_, deviceId: string) => {
-    console.log(`Main: restart-app handler called for device: ${deviceId}`);
-    try {
-      await AdbService.restartApp(deviceId);
-      console.log('Main: App restarted successfully');
-    } catch (error) {
-      console.error('Main: Error in restart-app handler:', error);
-      throw error;
+  ipcMain.handle(
+    'restart-app',
+    async (_, deviceId: string, packageName: string) => {
+      console.log(
+        `Main: restart-app handler called for device: ${deviceId}, package: ${packageName}`
+      );
+      try {
+        await AdbService.restartApp(deviceId, packageName);
+        console.log('Main: App restarted successfully');
+      } catch (error) {
+        console.error('Main: Error in restart-app handler:', error);
+        throw error;
+      }
     }
-  });
+  );
 }
 
 const createWindow = () => {

@@ -22,7 +22,10 @@ contextBridge.exposeInMainWorld('api', {
     selectedFile: string
   ) =>
     ipcRenderer.invoke('push-responses', deviceId, packageName, selectedFile),
-  restartApp: (deviceId: string) => ipcRenderer.invoke('restart-app', deviceId),
+  restartApp: (deviceId: string, packageName: string) =>
+    ipcRenderer.invoke('restart-app', deviceId, packageName),
+  cleanFiles: (deviceId: string, packageName: string) =>
+    ipcRenderer.invoke('clean-files', deviceId, packageName),
   onResponsesUpdated: (callback: (files: ResponseFile[]) => void) => {
     const subscription = (_event: any, files: ResponseFile[]) =>
       callback(files);
