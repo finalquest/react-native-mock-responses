@@ -5,10 +5,7 @@ declare global {
     api: {
       getResponseFiles(): Promise<ResponseFile[]>;
       getResponseFile(filename: string): Promise<ResponseFile | null>;
-      saveResponseFile(data: {
-        filename: string;
-        data: Record<string, any>;
-      }): Promise<void>;
+      saveResponseFile(data: { filename: string; content: any }): Promise<void>;
       getConnectedDevices(): Promise<string[]>;
       getInstalledApps(
         deviceId: string
@@ -25,6 +22,10 @@ declare global {
       ): Promise<void>;
       restartApp(deviceId: string, packageName: string): Promise<void>;
       cleanFiles(deviceId: string, packageName: string): Promise<void>;
+      selectFolder(): Promise<string>;
+      setSavePath(path: string): Promise<boolean>;
+      getSavePath(): Promise<string>;
+      onResponsesUpdated(callback: (files: ResponseFile[]) => void): () => void;
     };
   }
 }

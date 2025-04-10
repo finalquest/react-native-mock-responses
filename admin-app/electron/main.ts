@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import { FileService } from './services/fileService';
 import { AdbService } from './services/adbService';
@@ -6,6 +6,33 @@ import { AdbService } from './services/adbService';
 // Set up IPC handlers
 function setupIpcHandlers() {
   console.log('Setting up IPC handlers');
+
+  ipcMain.handle('set-save-path', async (_, savePath: string) => {
+    console.log('Main: set-save-path handler called with path:', savePath);
+    try {
+      FileService.setSavePath(savePath);
+      return true;
+    } catch (error) {
+      console.error('Main: Error in set-save-path handler:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('select-folder', async () => {
+    console.log('Main: select-folder handler called');
+    try {
+      const result = await dialog.showOpenDialog({
+        properties: ['openDirectory'],
+      });
+      if (!result.canceled && result.filePaths.length > 0) {
+        return result.filePaths[0];
+      }
+      return null;
+    } catch (error) {
+      console.error('Main: Error in select-folder handler:', error);
+      throw error;
+    }
+  });
 
   ipcMain.handle('get-response-files', async () => {
     console.log('Main: get-response-files handler called');
@@ -39,12 +66,12 @@ function setupIpcHandlers() {
 
   ipcMain.handle(
     'save-response-file',
-    async (_, data: { filename: string; data: Record<string, any> }) => {
+    async (_, data: { filename: string; content: any }) => {
       console.log(
         `Main: save-response-file handler called with filename: ${data.filename}`
       );
       try {
-        await FileService.saveResponseFile(data.filename, data.data);
+        await FileService.saveResponseFile(data.filename, data.content);
         console.log(`Main: Response file ${data.filename} saved successfully`);
       } catch (error) {
         console.error('Main: Error in save-response-file handler:', error);
@@ -148,6 +175,10 @@ function setupIpcHandlers() {
       }
     }
   );
+
+  ipcMain.handle('get-save-path', async () => {
+    return FileService.getSavePath();
+  });
 }
 
 const createWindow = () => {

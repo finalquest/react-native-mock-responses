@@ -3,6 +3,7 @@ import { promisify } from 'util';
 import path from 'path';
 import { app } from 'electron';
 import fs from 'fs';
+import { FileService } from './fileService';
 
 const execAsync = promisify(exec);
 
@@ -126,15 +127,18 @@ export class AdbService {
       console.log('Running adb root...');
       await this.runAdbCommand(`adb -s ${deviceId} root`);
 
+      // Get the save path from FileService
+      const savePath = FileService.getSavePath() || RESPONSES_DIR;
+      console.log('Using save path:', savePath);
+
       // Create responses directory if it doesn't exist
-      const responsesDir = path.join(PROJECT_ROOT, 'src', 'responses');
-      if (!fs.existsSync(responsesDir)) {
-        fs.mkdirSync(responsesDir, { recursive: true });
+      if (!fs.existsSync(savePath)) {
+        fs.mkdirSync(savePath, { recursive: true });
       }
 
       // Pull the responses file from the device
       const remotePath = `/data/user/0/${packageName}/files/msw-responses.json`;
-      const localPath = path.join(responsesDir, `${filename}.json`);
+      const localPath = path.join(savePath, `${filename}.json`);
 
       console.log(`Pulling from ${remotePath} to ${localPath}`);
       await this.runAdbCommand(
@@ -171,7 +175,8 @@ export class AdbService {
     console.log('Running adb root...');
     await this.runAdbCommand(`adb -s ${deviceId} root`);
 
-    const localPath = path.join(RESPONSES_DIR, selectedFile);
+    const savePath = FileService.getSavePath() || RESPONSES_DIR;
+    const localPath = path.join(savePath, selectedFile);
     const remotePath = `/data/user/0/${packageName}/files/msw-mock.json`;
 
     console.log(`Pushing responses from ${localPath} to device ${deviceId}`);

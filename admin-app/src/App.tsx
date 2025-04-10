@@ -22,15 +22,16 @@ function App() {
   } | null>(null);
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
 
+  const fetchResponses = async () => {
+    try {
+      const result = await window.api.getResponseFiles();
+      setResponses(result);
+    } catch (error) {
+      console.error('Error fetching responses:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchResponses = async () => {
-      try {
-        const result = await window.api.getResponseFiles();
-        setResponses(result);
-      } catch (error) {
-        console.error('Error fetching responses:', error);
-      }
-    };
     fetchResponses();
   }, []);
 
@@ -72,7 +73,7 @@ function App() {
     try {
       await window.api.saveResponseFile({
         filename: selectedResponse.filename,
-        data: updatedResponse.data,
+        content: updatedResponse.data,
       });
       setSelectedResponse(updatedResponse);
       setResponses((prevResponses) =>
@@ -95,8 +96,7 @@ function App() {
     try {
       await window.api.pullResponses(deviceId, packageName, filename);
       // Fetch all response files after pulling
-      const allResponses = await window.api.getResponseFiles();
-      setResponses(allResponses);
+      await fetchResponses();
       setSelectedResponse(null);
       setSelectedEndpoint(null);
     } catch (error) {
@@ -171,6 +171,7 @@ function App() {
                 onPullResponses={handlePullResponses}
                 onPushResponses={handlePushResponses}
                 onCleanFiles={handleCleanFiles}
+                onRefreshFiles={fetchResponses}
               />
             </div>
             <button

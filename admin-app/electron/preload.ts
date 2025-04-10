@@ -26,6 +26,9 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('restart-app', deviceId, packageName),
   cleanFiles: (deviceId: string, packageName: string) =>
     ipcRenderer.invoke('clean-files', deviceId, packageName),
+  selectFolder: () => ipcRenderer.invoke('select-folder'),
+  setSavePath: (path: string) => ipcRenderer.invoke('set-save-path', path),
+  getSavePath: () => ipcRenderer.invoke('get-save-path'),
   onResponsesUpdated: (callback: (files: ResponseFile[]) => void) => {
     const subscription = (_event: any, files: ResponseFile[]) =>
       callback(files);

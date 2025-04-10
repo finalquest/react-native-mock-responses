@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FilenameDialog } from './FilenameDialog';
 import { ResponseFile } from '../types/response';
 
@@ -17,6 +17,7 @@ interface ResponseActionsProps {
     selectedFile: string
   ) => void;
   onCleanFiles: (deviceId: string, packageName: string) => void;
+  onRefreshFiles: () => void;
 }
 
 export const ResponseActions: React.FC<ResponseActionsProps> = ({
@@ -26,11 +27,38 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   onPullResponses,
   onPushResponses,
   onCleanFiles,
+  onRefreshFiles,
 }) => {
   const [isPulling, setIsPulling] = useState(false);
   const [isPushing, setIsPushing] = useState(false);
   const [isCleaning, setIsCleaning] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [savePath, setSavePath] = useState('');
+  const prevSavePathRef = useRef('');
+
+  // Load save path on mount
+  useEffect(() => {
+    const loadSavePath = async () => {
+      try {
+        const path = await window.api.getSavePath();
+        if (path) {
+          setSavePath(path);
+          prevSavePathRef.current = path;
+        }
+      } catch (error) {
+        console.error('Error loading save path:', error);
+      }
+    };
+    loadSavePath();
+  }, []);
+
+  useEffect(() => {
+    if (savePath && savePath !== prevSavePathRef.current) {
+      window.api.setSavePath(savePath);
+      onRefreshFiles();
+      prevSavePathRef.current = savePath;
+    }
+  }, [savePath, onRefreshFiles]);
 
   const handlePull = async (filename: string) => {
     if (!deviceId || !selectedApp) return;
@@ -67,6 +95,17 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
     }
   };
 
+  const handleSelectFolder = async () => {
+    try {
+      const selectedPath = await window.api.selectFolder();
+      if (selectedPath) {
+        setSavePath(selectedPath);
+      }
+    } catch (error) {
+      console.error('Error selecting folder:', error);
+    }
+  };
+
   const getDefaultFilename = () => {
     if (!selectedApp) return 'responses';
     return `${selectedApp.packageName}-responses`;
@@ -75,6 +114,34 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   return (
     <>
       <div className="flex items-center gap-2">
+        <div className="relative">
+          <input
+            type="text"
+            value={savePath}
+            onChange={(e) => setSavePath(e.target.value)}
+            placeholder="Select save location..."
+            className="w-64 pl-3 pr-10 py-1.5 text-sm bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={handleSelectFolder}
+            className="absolute right-0 top-0 h-full px-2 text-gray-400 hover:text-white focus:outline-none"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+              />
+            </svg>
+          </button>
+        </div>
+
         <button
           onClick={() => setIsDialogOpen(true)}
           disabled={!deviceId || !selectedApp || isPulling}
