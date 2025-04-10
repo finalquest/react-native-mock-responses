@@ -1,41 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useClickOutside } from '../hooks/useClickOutside'
+import React, { useState, useEffect, useRef } from 'react';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 interface DeviceSelectorProps {
-  onDeviceSelect: (deviceId: string) => void
-  isDarkMode: boolean
+  onDeviceSelect: (deviceId: string) => void;
+  isDarkMode: boolean;
 }
 
-export const DeviceSelector: React.FC<DeviceSelectorProps> = ({ onDeviceSelect, isDarkMode }) => {
-  const [devices, setDevices] = useState<string[]>([])
-  const [selectedDevice, setSelectedDevice] = useState<string | null>(null)
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+export const DeviceSelector: React.FC<DeviceSelectorProps> = ({
+  onDeviceSelect,
+  isDarkMode,
+}) => {
+  const [devices, setDevices] = useState<string[]>([]);
+  const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useClickOutside(dropdownRef, () => setIsOpen(false))
+  useClickOutside(dropdownRef, () => setIsOpen(false));
 
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        const result = await window.api.getConnectedDevices()
-        setDevices(result)
+        const result = await window.api.getConnectedDevices();
+        setDevices(result);
         if (result.length > 0) {
-          setSelectedDevice(result[0])
-          onDeviceSelect(result[0])
+          setSelectedDevice(result[0]);
+          onDeviceSelect(result[0]);
         }
       } catch (error) {
-        console.error('Error fetching devices:', error)
+        console.error('Error fetching devices:', error);
       }
-    }
+    };
 
-    fetchDevices()
-  }, [onDeviceSelect])
+    fetchDevices();
+  }, [onDeviceSelect]);
 
   const handleDeviceSelect = (deviceId: string) => {
-    setSelectedDevice(deviceId)
-    setIsOpen(false)
-    onDeviceSelect(deviceId)
-  }
+    setSelectedDevice(deviceId);
+    setIsOpen(false);
+    onDeviceSelect(deviceId);
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -64,9 +67,13 @@ export const DeviceSelector: React.FC<DeviceSelectorProps> = ({ onDeviceSelect, 
       </button>
 
       {isOpen && (
-        <div className={`absolute top-full left-0 mt-1 w-64 rounded shadow-lg z-10 ${
-          isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
-        }`}>
+        <div
+          className={`absolute top-full left-0 mt-1 w-64 rounded shadow-lg z-10 ${
+            isDarkMode
+              ? 'bg-gray-700 border-gray-600'
+              : 'bg-white border-gray-200'
+          }`}
+        >
           {devices.map((device) => (
             <button
               key={device}
@@ -75,8 +82,8 @@ export const DeviceSelector: React.FC<DeviceSelectorProps> = ({ onDeviceSelect, 
                 selectedDevice === device
                   ? 'bg-blue-600 text-white'
                   : isDarkMode
-                  ? 'text-gray-100 hover:bg-gray-600'
-                  : 'text-gray-800 hover:bg-gray-100'
+                    ? 'text-gray-100 hover:bg-gray-600'
+                    : 'text-gray-800 hover:bg-gray-100'
               }`}
             >
               <div className="truncate" title={device}>
@@ -87,5 +94,5 @@ export const DeviceSelector: React.FC<DeviceSelectorProps> = ({ onDeviceSelect, 
         </div>
       )}
     </div>
-  )
-} 
+  );
+};

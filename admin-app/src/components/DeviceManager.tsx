@@ -1,121 +1,107 @@
-import React, { useEffect, useState } from 'react'
-import { Device, InstalledApp } from '../types/device'
-
-declare global {
-  interface Window {
-    api: {
-      getResponseFiles(): Promise<ResponseFile[]>
-      getResponseFile(filename: string): Promise<ResponseFile | null>
-      saveResponseFile(data: { filename: string; data: Record<string, any> }): Promise<void>
-      getConnectedDevices(): Promise<string[]>
-      getInstalledApps(deviceId: string): Promise<InstalledApp[]>
-      pullResponses(deviceId: string): Promise<ResponseFile[]>
-      pushResponses(deviceId: string): Promise<void>
-      restartApp(deviceId: string): Promise<void>
-    }
-  }
-}
+import React, { useEffect, useState } from 'react';
 
 export const DeviceManager: React.FC = () => {
-  const [devices, setDevices] = useState<string[]>([])
-  const [selectedDevice, setSelectedDevice] = useState<string | null>(null)
-  const [installedApps, setInstalledApps] = useState<InstalledApp[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [devices, setDevices] = useState<string[]>([]);
+  const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
+  const [installedApps, setInstalledApps] = useState<
+    { packageName: string; appName: string }[]
+  >([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDevices = async () => {
       try {
-        setLoading(true)
-        const connectedDevices = await window.api.getConnectedDevices()
-        setDevices(connectedDevices)
-        setError(null)
+        setLoading(true);
+        const connectedDevices = await window.api.getConnectedDevices();
+        setDevices(connectedDevices);
+        setError(null);
       } catch (err) {
-        setError('Failed to fetch connected devices')
-        console.error('Error fetching devices:', err)
+        setError('Failed to fetch connected devices');
+        console.error('Error fetching devices:', err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchDevices()
-  }, [])
+    fetchDevices();
+  }, []);
 
   useEffect(() => {
     const fetchInstalledApps = async () => {
-      if (!selectedDevice) return
+      if (!selectedDevice) return;
 
       try {
-        setLoading(true)
-        const apps = await window.api.getInstalledApps(selectedDevice)
-        setInstalledApps(apps)
-        setError(null)
+        setLoading(true);
+        const apps = await window.api.getInstalledApps(selectedDevice);
+        setInstalledApps(apps);
+        setError(null);
       } catch (err) {
-        setError('Failed to fetch installed apps')
-        console.error('Error fetching installed apps:', err)
+        setError('Failed to fetch installed apps');
+        console.error('Error fetching installed apps:', err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchInstalledApps()
-  }, [selectedDevice])
+    fetchInstalledApps();
+  }, [selectedDevice]);
 
   const handleDeviceSelect = (device: string) => {
-    setSelectedDevice(device)
-  }
+    setSelectedDevice(device);
+  };
 
   const handlePullResponses = async () => {
-    if (!selectedDevice) return
+    if (!selectedDevice) return;
 
     try {
-      setLoading(true)
-      await window.api.pullResponses(selectedDevice)
-      setError(null)
+      setLoading(true);
+      await window.api.pullResponses(selectedDevice, '', '');
+      setError(null);
     } catch (err) {
-      setError('Failed to pull responses')
-      console.error('Error pulling responses:', err)
+      setError('Failed to pull responses');
+      console.error('Error pulling responses:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handlePushResponses = async () => {
-    if (!selectedDevice) return
+    if (!selectedDevice) return;
 
     try {
-      setLoading(true)
-      await window.api.pushResponses(selectedDevice)
-      setError(null)
+      setLoading(true);
+      await window.api.pushResponses(selectedDevice, '', '');
+      setError(null);
     } catch (err) {
-      setError('Failed to push responses')
-      console.error('Error pushing responses:', err)
+      setError('Failed to push responses');
+      console.error('Error pushing responses:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleRestartApp = async () => {
-    if (!selectedDevice) return
+    if (!selectedDevice) return;
 
     try {
-      setLoading(true)
-      await window.api.restartApp(selectedDevice)
-      setError(null)
+      setLoading(true);
+      await window.api.restartApp(selectedDevice);
+      setError(null);
     } catch (err) {
-      setError('Failed to restart app')
-      console.error('Error restarting app:', err)
+      setError('Failed to restart app');
+      console.error('Error restarting app:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="device-manager">
       <h2>Device Manager</h2>
-      
+
       {error && <div className="error">{error}</div>}
-      
+
       <div className="devices">
         <h3>Connected Devices</h3>
         {loading ? (
@@ -124,8 +110,8 @@ export const DeviceManager: React.FC = () => {
           <div>No devices connected</div>
         ) : (
           <ul>
-            {devices.map(device => (
-              <li 
+            {devices.map((device) => (
+              <li
                 key={device}
                 className={selectedDevice === device ? 'selected' : ''}
                 onClick={() => handleDeviceSelect(device)}
@@ -161,9 +147,9 @@ export const DeviceManager: React.FC = () => {
             <div>No apps found</div>
           ) : (
             <ul>
-              {installedApps.map(app => (
+              {installedApps.map((app) => (
                 <li key={app.packageName}>
-                  {app.name} ({app.packageName})
+                  {app.appName} ({app.packageName})
                 </li>
               ))}
             </ul>
@@ -171,5 +157,5 @@ export const DeviceManager: React.FC = () => {
         </div>
       )}
     </div>
-  )
-} 
+  );
+};

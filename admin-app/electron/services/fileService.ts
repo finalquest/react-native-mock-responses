@@ -18,22 +18,22 @@ export class FileService {
 
   private static initialize() {
     if (this.initialized) return;
-    
+
     console.log('FileService initialized');
     console.log('NODE_ENV:', process.env.NODE_ENV);
     console.log('App path:', PROJECT_ROOT);
     console.log('Responses directory:', RESPONSES_DIR);
     console.log('Directory exists:', fs.existsSync(RESPONSES_DIR));
-    
+
     this.initialized = true;
   }
 
   public static getResponseFiles(): ResponseFile[] {
     this.initialize();
-    
+
     try {
       console.log('Getting response files from:', RESPONSES_DIR);
-      
+
       if (!fs.existsSync(RESPONSES_DIR)) {
         console.error('Responses directory does not exist:', RESPONSES_DIR);
         return [];
@@ -43,12 +43,12 @@ export class FileService {
       console.log('Found files in directory:', files);
 
       const responseFiles = files
-        .filter(file => {
+        .filter((file) => {
           const isJson = file.endsWith('.json');
           console.log(`File ${file} is JSON:`, isJson);
           return isJson;
         })
-        .map(file => {
+        .map((file) => {
           try {
             const filePath = path.join(RESPONSES_DIR, file);
             console.log(`Reading file: ${filePath}`);
@@ -57,7 +57,7 @@ export class FileService {
             console.log(`Successfully parsed file: ${file}`);
             return {
               filename: file,
-              data: data
+              data: data,
             };
           } catch (error) {
             console.error(`Error reading file ${file}:`, error);
@@ -79,7 +79,7 @@ export class FileService {
     console.log('FileService: Getting response file:', filename);
     const filePath = path.join(RESPONSES_DIR, filename);
     console.log('FileService: Full file path:', filePath);
-    
+
     if (!fs.existsSync(filePath)) {
       console.error('FileService: File not found:', filePath);
       return null;
@@ -95,7 +95,10 @@ export class FileService {
     }
   }
 
-  static async saveResponseFile(filename: string, data: Record<string, any>): Promise<void> {
+  static async saveResponseFile(
+    filename: string,
+    data: Record<string, any>
+  ): Promise<void> {
     this.initialize();
     console.log('FileService: Saving response file:', filename);
     const filePath = path.join(RESPONSES_DIR, filename);
@@ -110,4 +113,4 @@ export class FileService {
       throw err;
     }
   }
-} 
+}

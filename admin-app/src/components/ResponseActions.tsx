@@ -1,48 +1,63 @@
-import React, { useState } from 'react'
-import { FilenameDialog } from './FilenameDialog'
+import React, { useState } from 'react';
+import { FilenameDialog } from './FilenameDialog';
+import { ResponseFile } from '../types/response';
 
 interface ResponseActionsProps {
-  deviceId: string | null
-  selectedApp: { packageName: string; appName: string } | null
-  onPullResponses: (deviceId: string, packageName: string, filename: string) => void
-  onPushResponses: (deviceId: string) => void
+  deviceId: string | null;
+  selectedApp: { packageName: string; appName: string } | null;
+  selectedResponse: ResponseFile | null;
+  onPullResponses: (
+    deviceId: string,
+    packageName: string,
+    filename: string
+  ) => void;
+  onPushResponses: (
+    deviceId: string,
+    packageName: string,
+    selectedFile: string
+  ) => void;
 }
 
 export const ResponseActions: React.FC<ResponseActionsProps> = ({
   deviceId,
   selectedApp,
+  selectedResponse,
   onPullResponses,
-  onPushResponses
+  onPushResponses,
 }) => {
-  const [isPulling, setIsPulling] = useState(false)
-  const [isPushing, setIsPushing] = useState(false)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isPulling, setIsPulling] = useState(false);
+  const [isPushing, setIsPushing] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handlePull = async (filename: string) => {
-    if (!deviceId || !selectedApp) return
-    
+    if (!deviceId || !selectedApp) return;
+
     try {
-      setIsPulling(true)
-      await onPullResponses(deviceId, selectedApp.packageName, filename)
+      setIsPulling(true);
+      await onPullResponses(deviceId, selectedApp.packageName, filename);
     } finally {
-      setIsPulling(false)
+      setIsPulling(false);
     }
-  }
+  };
 
   const handlePush = async () => {
-    if (!deviceId) return
-    setIsPushing(true)
+    if (!deviceId || !selectedApp || !selectedResponse) return;
+    setIsPushing(true);
     try {
-      await onPushResponses(deviceId)
+      await onPushResponses(
+        deviceId,
+        selectedApp.packageName,
+        selectedResponse.filename
+      );
     } finally {
-      setIsPushing(false)
+      setIsPushing(false);
     }
-  }
+  };
 
   const getDefaultFilename = () => {
-    if (!selectedApp) return 'responses'
-    return `${selectedApp.packageName}-responses`
-  }
+    if (!selectedApp) return 'responses';
+    return `${selectedApp.packageName}-responses`;
+  };
 
   return (
     <>
@@ -57,7 +72,7 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
 
         <button
           onClick={handlePush}
-          disabled={!deviceId || isPushing}
+          disabled={!deviceId || !selectedResponse || isPushing}
           className="px-3 py-1.5 text-sm text-white bg-green-600 hover:bg-green-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPushing ? 'Pushing...' : 'Push'}
@@ -71,5 +86,5 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
         onConfirm={handlePull}
       />
     </>
-  )
-} 
+  );
+};

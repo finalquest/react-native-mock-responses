@@ -8,4 +8,4 @@ export interface ResponseData {
 export interface ResponseFile {
   filename: string;
   data: Record<string, ResponseData>;
-} 
+}

@@ -1,43 +1,47 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useClickOutside } from '../hooks/useClickOutside'
+import React, { useState, useEffect, useRef } from 'react';
+import { useClickOutside } from '../hooks/useClickOutside';
 
 interface InstalledApp {
-  packageName: string
-  appName: string
+  packageName: string;
+  appName: string;
 }
 
 interface InstalledAppsProps {
-  deviceId: string | null
-  onAppSelect: (app: InstalledApp) => void
-  isDarkMode: boolean
+  deviceId: string | null;
+  onAppSelect: (app: InstalledApp) => void;
+  isDarkMode: boolean;
 }
 
-export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSelect, isDarkMode }) => {
-  const [apps, setApps] = useState<InstalledApp[]>([])
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedApp, setSelectedApp] = useState<InstalledApp | null>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+export const InstalledApps: React.FC<InstalledAppsProps> = ({
+  deviceId,
+  onAppSelect,
+  isDarkMode,
+}) => {
+  const [apps, setApps] = useState<InstalledApp[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedApp, setSelectedApp] = useState<InstalledApp | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useClickOutside(dropdownRef, () => setIsOpen(false))
+  useClickOutside(dropdownRef, () => setIsOpen(false));
 
   useEffect(() => {
     const fetchApps = async () => {
-      if (!deviceId) return
+      if (!deviceId) return;
       try {
-        const result = await window.api.getInstalledApps(deviceId)
-        setApps(result)
+        const result = await window.api.getInstalledApps(deviceId);
+        setApps(result);
       } catch (error) {
-        console.error('Error fetching apps:', error)
+        console.error('Error fetching apps:', error);
       }
-    }
-    fetchApps()
-  }, [deviceId])
+    };
+    fetchApps();
+  }, [deviceId]);
 
   const handleAppSelect = (app: InstalledApp) => {
-    setSelectedApp(app)
-    onAppSelect(app)
-    setIsOpen(false)
-  }
+    setSelectedApp(app);
+    onAppSelect(app);
+    setIsOpen(false);
+  };
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -66,9 +70,13 @@ export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSel
         </svg>
       </button>
       {isOpen && (
-        <div className={`absolute top-full left-0 mt-1 w-64 rounded shadow-lg z-10 ${
-          isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
-        }`}>
+        <div
+          className={`absolute top-full left-0 mt-1 w-64 rounded shadow-lg z-10 ${
+            isDarkMode
+              ? 'bg-gray-700 border-gray-600'
+              : 'bg-white border-gray-200'
+          }`}
+        >
           {apps.map((app) => (
             <button
               key={app.packageName}
@@ -77,11 +85,14 @@ export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSel
                 selectedApp?.packageName === app.packageName
                   ? 'bg-blue-600 text-white'
                   : isDarkMode
-                  ? 'text-gray-100 hover:bg-gray-600'
-                  : 'text-gray-800 hover:bg-gray-100'
+                    ? 'text-gray-100 hover:bg-gray-600'
+                    : 'text-gray-800 hover:bg-gray-100'
               }`}
             >
-              <div className="truncate" title={`${app.appName} (${app.packageName})`}>
+              <div
+                className="truncate"
+                title={`${app.appName} (${app.packageName})`}
+              >
                 {app.appName}
               </div>
             </button>
@@ -89,5 +100,5 @@ export const InstalledApps: React.FC<InstalledAppsProps> = ({ deviceId, onAppSel
         </div>
       )}
     </div>
-  )
-} 
+  );
+};

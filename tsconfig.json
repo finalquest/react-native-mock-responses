@@ -25,5 +25,10 @@
     "strict": true,
     "target": "ESNext",
     "verbatimModuleSyntax": true
-  }
+  },
+  "include": ["src"],
+  "exclude": ["admin-app", "node_modules"],
+  "references": [
+    { "path": "./admin-app" }
+  ]
 }

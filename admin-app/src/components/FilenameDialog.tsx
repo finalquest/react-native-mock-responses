@@ -1,36 +1,41 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 
 interface FilenameDialogProps {
-  isOpen: boolean
-  defaultFilename: string
-  onClose: () => void
-  onConfirm: (filename: string) => void
+  isOpen: boolean;
+  defaultFilename: string;
+  onClose: () => void;
+  onConfirm: (filename: string) => void;
 }
 
 export const FilenameDialog: React.FC<FilenameDialogProps> = ({
   isOpen,
   defaultFilename,
   onClose,
-  onConfirm
+  onConfirm,
 }) => {
-  const [filename, setFilename] = useState('')
+  const [filename, setFilename] = useState('');
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const finalFilename = filename.trim() || defaultFilename
-    onConfirm(finalFilename)
-    onClose()
-  }
+    e.preventDefault();
+    const finalFilename = filename.trim() || defaultFilename;
+    onConfirm(finalFilename);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-96">
-        <h2 className="text-xl font-semibold text-white mb-4">Choose Filename</h2>
+        <h2 className="text-xl font-semibold text-white mb-4">
+          Choose Filename
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="filename" className="block text-sm font-medium text-gray-300 mb-2">
+            <label
+              htmlFor="filename"
+              className="block text-sm font-medium text-gray-300 mb-2"
+            >
               Filename (without extension)
             </label>
             <input
@@ -63,5 +68,5 @@ export const FilenameDialog: React.FC<FilenameDialogProps> = ({
         </form>
       </div>
     </div>
-  )
-} 
+  );
+};
