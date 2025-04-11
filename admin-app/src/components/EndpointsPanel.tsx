@@ -6,6 +6,8 @@ interface EndpointsPanelProps {
   selectedEndpoint: string | null;
   onEndpointClick: (endpoint: string) => void;
   isDarkMode: boolean;
+  activeTab: 'responses' | 'storage';
+  onTabChange: (tab: 'responses' | 'storage') => void;
 }
 
 export const EndpointsPanel: React.FC<EndpointsPanelProps> = ({
@@ -13,6 +15,8 @@ export const EndpointsPanel: React.FC<EndpointsPanelProps> = ({
   selectedEndpoint,
   onEndpointClick,
   isDarkMode,
+  activeTab,
+  onTabChange,
 }) => {
   const [width, setWidth] = useState(300);
   const [isResizing, setIsResizing] = useState(false);
@@ -59,6 +63,28 @@ export const EndpointsPanel: React.FC<EndpointsPanelProps> = ({
     );
   }
 
+  const renderContent = () => {
+    return Object.entries(selectedResponse.data).map(([endpoint]) => (
+      <div
+        key={endpoint}
+        className={`p-2 rounded cursor-pointer ${
+          selectedEndpoint === endpoint
+            ? isDarkMode
+              ? 'bg-gray-700 text-white'
+              : 'bg-gray-200 text-gray-900'
+            : isDarkMode
+              ? 'text-gray-300'
+              : 'text-gray-700'
+        }`}
+        onClick={() => onEndpointClick(endpoint)}
+      >
+        <div className="truncate" title={endpoint}>
+          {endpoint}
+        </div>
+      </div>
+    ));
+  };
+
   return (
     <div
       ref={panelRef}
@@ -68,33 +94,43 @@ export const EndpointsPanel: React.FC<EndpointsPanelProps> = ({
       <div
         className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
       >
-        <h2
-          className={`text-lg font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
-        >
-          Endpoints
-        </h2>
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        {Object.entries(selectedResponse.data).map(([endpoint]) => (
-          <div
-            key={endpoint}
-            className={`p-2 rounded cursor-pointer ${
-              selectedEndpoint === endpoint
+        <div className="flex space-x-2 mb-2">
+          <button
+            className={`px-3 py-1 rounded ${
+              activeTab === 'responses'
                 ? isDarkMode
                   ? 'bg-gray-700 text-white'
                   : 'bg-gray-200 text-gray-900'
                 : isDarkMode
-                  ? 'text-gray-300'
-                  : 'text-gray-700'
+                  ? 'text-gray-400 hover:text-gray-300'
+                  : 'text-gray-500 hover:text-gray-700'
             }`}
-            onClick={() => onEndpointClick(endpoint)}
+            onClick={() => onTabChange('responses')}
           >
-            <div className="truncate" title={endpoint}>
-              {endpoint}
-            </div>
-          </div>
-        ))}
+            Endpoints
+          </button>
+          <button
+            className={`px-3 py-1 rounded ${
+              activeTab === 'storage'
+                ? isDarkMode
+                  ? 'bg-gray-700 text-white'
+                  : 'bg-gray-200 text-gray-900'
+                : isDarkMode
+                  ? 'text-gray-400 hover:text-gray-300'
+                  : 'text-gray-500 hover:text-gray-700'
+            }`}
+            onClick={() => onTabChange('storage')}
+          >
+            Storage
+          </button>
+        </div>
+        <h2
+          className={`text-lg font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}
+        >
+          {activeTab === 'responses' ? 'Endpoints' : 'Storage Data'}
+        </h2>
       </div>
+      <div className="flex-1 overflow-y-auto">{renderContent()}</div>
       <div
         className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500"
         onMouseDown={startResizing}

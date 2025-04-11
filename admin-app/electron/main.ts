@@ -109,15 +109,22 @@ function setupIpcHandlers() {
 
   ipcMain.handle(
     'pull-responses',
-    async (_, deviceId: string, packageName: string, filename: string) => {
+    async (
+      _,
+      deviceId: string,
+      packageName: string,
+      filename: string,
+      linkStorage: boolean
+    ) => {
       console.log(
-        `Main: pull-responses handler called for device: ${deviceId}, package: ${packageName}, filename: ${filename}`
+        `Main: pull-responses handler called for device: ${deviceId}, package: ${packageName}, filename: ${filename}, linkStorage: ${linkStorage}`
       );
       try {
         const files = await AdbService.pullResponses(
           deviceId,
           packageName,
-          filename
+          filename,
+          linkStorage
         );
         console.log('Main: Responses pulled successfully');
         return files;

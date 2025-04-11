@@ -1,12 +1,15 @@
 import React from 'react';
 import { ResponseFile } from '../types/response';
 import { EndpointDetails } from './EndpointDetails';
+import { StorageDetails } from './StorageDetails';
 
 interface MainPanelProps {
   selectedResponse: ResponseFile | null;
   selectedEndpoint: string | null;
   onUpdateEndpoint: (updatedEndpoint: any) => void;
   isDarkMode: boolean;
+  activeTab: 'responses' | 'storage';
+  onUpdateStorage?: (updatedStorage: any) => void;
 }
 
 export const MainPanel: React.FC<MainPanelProps> = ({
@@ -14,6 +17,8 @@ export const MainPanel: React.FC<MainPanelProps> = ({
   selectedEndpoint,
   onUpdateEndpoint,
   isDarkMode,
+  activeTab,
+  onUpdateStorage,
 }) => {
   if (!selectedResponse) {
     return (
@@ -30,15 +35,25 @@ export const MainPanel: React.FC<MainPanelProps> = ({
       <div
         className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
       >
-        <h2 className="font-semibold">Response Details</h2>
+        <h2 className="font-semibold">
+          {activeTab === 'responses' ? 'Response Details' : 'Storage Data'}
+        </h2>
       </div>
       <div className="flex-1 overflow-y-auto">
-        <EndpointDetails
-          selectedResponse={selectedResponse}
-          selectedEndpoint={selectedEndpoint}
-          onUpdateEndpoint={onUpdateEndpoint}
-          isDarkMode={isDarkMode}
-        />
+        {activeTab === 'responses' ? (
+          <EndpointDetails
+            selectedResponse={selectedResponse}
+            selectedEndpoint={selectedEndpoint}
+            onUpdateEndpoint={onUpdateEndpoint}
+            isDarkMode={isDarkMode}
+          />
+        ) : (
+          <StorageDetails
+            selectedResponse={selectedResponse}
+            isDarkMode={isDarkMode}
+            onUpdateStorage={onUpdateStorage}
+          />
+        )}
       </div>
     </div>
   );

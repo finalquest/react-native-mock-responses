@@ -14,8 +14,19 @@ contextBridge.exposeInMainWorld('api', {
   getConnectedDevices: () => ipcRenderer.invoke('get-connected-devices'),
   getInstalledApps: (deviceId: string) =>
     ipcRenderer.invoke('get-installed-apps', deviceId),
-  pullResponses: (deviceId: string, packageName: string, filename: string) =>
-    ipcRenderer.invoke('pull-responses', deviceId, packageName, filename),
+  pullResponses: (
+    deviceId: string,
+    packageName: string,
+    filename: string,
+    linkStorage: boolean
+  ) =>
+    ipcRenderer.invoke(
+      'pull-responses',
+      deviceId,
+      packageName,
+      filename,
+      linkStorage
+    ),
   pushResponses: (
     deviceId: string,
     packageName: string,

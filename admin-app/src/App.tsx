@@ -21,11 +21,34 @@ function App() {
     appName: string;
   } | null>(null);
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'responses' | 'storage'>(
+    'responses'
+  );
 
   const fetchResponses = async () => {
     try {
       const result = await window.api.getResponseFiles();
-      setResponses(result);
+
+      // Process storage files
+      const processedResponses = result
+        .map((response) => {
+          const storageFilename = response.filename.replace(
+            '.json',
+            '-storage.json'
+          );
+          const storageFile = result.find(
+            (r) => r.filename === storageFilename
+          );
+
+          return {
+            ...response,
+            hasStorage: !!storageFile,
+            storage: storageFile?.data || undefined,
+          };
+        })
+        .filter((response) => !response.filename.endsWith('-storage.json')); // Filter out storage files from the list
+
+      setResponses(processedResponses);
     } catch (error) {
       console.error('Error fetching responses:', error);
     }
@@ -88,13 +111,46 @@ function App() {
     }
   };
 
+  const handleUpdateStorage = async (updatedStorage: any) => {
+    if (!selectedResponse) return;
+
+    const updatedResponse = {
+      ...selectedResponse,
+      storage: updatedStorage,
+    };
+
+    try {
+      await window.api.saveResponseFile({
+        filename: selectedResponse.filename,
+        content: updatedResponse.data,
+      });
+      setSelectedResponse(updatedResponse);
+      setResponses((prevResponses) =>
+        prevResponses.map((response) =>
+          response.filename === selectedResponse.filename
+            ? updatedResponse
+            : response
+        )
+      );
+    } catch (error) {
+      console.error('Error updating storage:', error);
+    }
+  };
+
   const handlePullResponses = async (
     deviceId: string,
     packageName: string,
-    filename: string
+    filename: string,
+    linkStorage: boolean
   ) => {
     try {
-      await window.api.pullResponses(deviceId, packageName, filename);
+      await window.api.pullResponses(
+        deviceId,
+        packageName,
+        filename,
+        linkStorage
+      );
+
       // Fetch all response files after pulling
       await fetchResponses();
       setSelectedResponse(null);
@@ -143,6 +199,8 @@ function App() {
         selectedResponse={selectedResponse}
         onResponseClick={handleResponseClick}
         isDarkMode={isDarkMode}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
       <div className="flex-1 flex flex-col">
         <div
@@ -216,12 +274,16 @@ function App() {
             selectedEndpoint={selectedEndpoint}
             onEndpointClick={setSelectedEndpoint}
             isDarkMode={isDarkMode}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
           />
           <MainPanel
             selectedResponse={selectedResponse}
             selectedEndpoint={selectedEndpoint}
             onUpdateEndpoint={handleUpdateEndpoint}
             isDarkMode={isDarkMode}
+            activeTab={activeTab}
+            onUpdateStorage={handleUpdateStorage}
           />
         </div>
       </div>

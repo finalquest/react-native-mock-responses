@@ -7,6 +7,8 @@ interface FileDrawerProps {
   selectedResponse: ResponseFile | null;
   onResponseClick: (filename: string) => void;
   isDarkMode: boolean;
+  activeTab: 'responses' | 'storage';
+  onTabChange: (tab: 'responses' | 'storage') => void;
 }
 
 export const FileDrawer: React.FC<FileDrawerProps> = ({
@@ -15,6 +17,8 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
   selectedResponse,
   onResponseClick,
   isDarkMode,
+  activeTab,
+  onTabChange,
 }) => {
   return (
     <div
@@ -36,6 +40,41 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
         >
           Response Files
         </h2>
+
+        {/* Tabs */}
+        <div
+          className={`flex mb-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
+        >
+          <button
+            onClick={() => onTabChange('responses')}
+            className={`px-4 py-2 text-sm font-medium ${
+              activeTab === 'responses'
+                ? isDarkMode
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-blue-600 border-b-2 border-blue-600'
+                : isDarkMode
+                  ? 'text-gray-400 hover:text-gray-300'
+                  : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Responses
+          </button>
+          <button
+            onClick={() => onTabChange('storage')}
+            className={`px-4 py-2 text-sm font-medium ${
+              activeTab === 'storage'
+                ? isDarkMode
+                  ? 'text-blue-400 border-b-2 border-blue-400'
+                  : 'text-blue-600 border-b-2 border-blue-600'
+                : isDarkMode
+                  ? 'text-gray-400 hover:text-gray-300'
+                  : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Storage
+          </button>
+        </div>
+
         <div className="space-y-1">
           {responses.map((response) => (
             <div
@@ -59,7 +98,11 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
               <span
                 className={`text-xs ml-2 shrink-0 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}
               >
-                {Object.keys(response.data).length} endpoints
+                {activeTab === 'responses'
+                  ? `${Object.keys(response.data).length} endpoints`
+                  : response.hasStorage
+                    ? 'Has storage'
+                    : 'No storage'}
               </span>
             </div>
           ))}

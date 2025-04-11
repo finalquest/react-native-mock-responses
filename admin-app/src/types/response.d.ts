@@ -4,11 +4,9 @@ export interface ResponseData {
   headers: Record<string, string>;
   body: any;
 }
-
 export interface StorageData {
   [key: string]: any;
 }
-
 export interface ResponseFile {
   filename: string;
   data: Record<string, ResponseData>;

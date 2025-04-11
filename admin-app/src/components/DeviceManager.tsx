@@ -51,57 +51,6 @@ export const DeviceManager: React.FC = () => {
     setSelectedDevice(device);
   };
 
-  const handlePullResponses = async () => {
-    if (!selectedDevice) return;
-
-    try {
-      setLoading(true);
-      await window.api.pullResponses(selectedDevice, '', '');
-      setError(null);
-    } catch (err) {
-      setError('Failed to pull responses');
-      console.error('Error pulling responses:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePushResponses = async () => {
-    if (!selectedDevice) return;
-
-    try {
-      setLoading(true);
-      await window.api.pushResponses(selectedDevice, '', '');
-      setError(null);
-    } catch (err) {
-      setError('Failed to push responses');
-      console.error('Error pushing responses:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRestartApp = async () => {
-    if (!selectedDevice) return;
-
-    try {
-      setLoading(true);
-      // Get the first installed app's package name
-      const packageName = installedApps[0]?.packageName;
-      if (!packageName) {
-        setError('No installed apps found');
-        return;
-      }
-      await window.api.restartApp(selectedDevice, packageName);
-      setError(null);
-    } catch (err) {
-      setError('Failed to restart app');
-      console.error('Error restarting app:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="device-manager">
       <h2>Device Manager</h2>
@@ -128,21 +77,6 @@ export const DeviceManager: React.FC = () => {
           </ul>
         )}
       </div>
-
-      {selectedDevice && (
-        <div className="device-actions">
-          <h3>Actions for {selectedDevice}</h3>
-          <button onClick={handlePullResponses} disabled={loading}>
-            Pull Responses
-          </button>
-          <button onClick={handlePushResponses} disabled={loading}>
-            Push Responses
-          </button>
-          <button onClick={handleRestartApp} disabled={loading}>
-            Restart App
-          </button>
-        </div>
-      )}
 
       {selectedDevice && (
         <div className="installed-apps">

@@ -9,7 +9,8 @@ interface ResponseActionsProps {
   onPullResponses: (
     deviceId: string,
     packageName: string,
-    filename: string
+    filename: string,
+    linkStorage: boolean
   ) => void;
   onPushResponses: (
     deviceId: string,
@@ -34,6 +35,7 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   const [isCleaning, setIsCleaning] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [savePath, setSavePath] = useState('');
+  const [linkStorage, setLinkStorage] = useState(false);
   const prevSavePathRef = useRef('');
 
   // Load save path on mount
@@ -65,7 +67,12 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
 
     try {
       setIsPulling(true);
-      await onPullResponses(deviceId, selectedApp.packageName, filename);
+      await onPullResponses(
+        deviceId,
+        selectedApp.packageName,
+        filename,
+        linkStorage
+      );
     } finally {
       setIsPulling(false);
     }
@@ -140,6 +147,18 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
               />
             </svg>
           </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-sm text-gray-300">
+            <input
+              type="checkbox"
+              checked={linkStorage}
+              onChange={(e) => setLinkStorage(e.target.checked)}
+              className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+            />
+            Link Storage
+          </label>
         </div>
 
         <button

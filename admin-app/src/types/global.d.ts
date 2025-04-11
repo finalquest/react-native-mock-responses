@@ -13,7 +13,8 @@ declare global {
       pullResponses(
         deviceId: string,
         packageName: string,
-        filename: string
+        filename: string,
+        linkStorage: boolean
       ): Promise<ResponseFile[]>;
       pushResponses(
         deviceId: string,

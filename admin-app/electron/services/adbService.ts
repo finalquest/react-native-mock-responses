@@ -116,10 +116,11 @@ export class AdbService {
   public static async pullResponses(
     deviceId: string,
     packageName: string,
-    filename: string
+    filename: string,
+    linkStorage: boolean = false
   ): Promise<ResponseFile[]> {
     console.log(
-      `Pulling responses for package ${packageName} from device ${deviceId} with filename ${filename}`
+      `Pulling responses for package ${packageName} from device ${deviceId} with filename ${filename}, linkStorage: ${linkStorage}`
     );
 
     try {
@@ -136,30 +137,63 @@ export class AdbService {
         fs.mkdirSync(savePath, { recursive: true });
       }
 
-      // Pull the responses file from the device
-      const remotePath = `/data/user/0/${packageName}/files/msw-responses.json`;
-      const localPath = path.join(savePath, `${filename}.json`);
+      const result: ResponseFile[] = [];
 
-      console.log(`Pulling from ${remotePath} to ${localPath}`);
+      // Pull the responses file from the device
+      const responsesRemotePath = `/data/user/0/${packageName}/files/msw-responses.json`;
+      const responsesLocalPath = path.join(savePath, `${filename}.json`);
+
+      console.log(
+        `Pulling responses from ${responsesRemotePath} to ${responsesLocalPath}`
+      );
       await this.runAdbCommand(
-        `adb -s ${deviceId} pull ${remotePath} ${localPath}`
+        `adb -s ${deviceId} pull ${responsesRemotePath} ${responsesLocalPath}`
       );
 
-      // Read and parse the pulled file
-      if (fs.existsSync(localPath)) {
-        const content = fs.readFileSync(localPath, 'utf-8');
+      // Read and parse the pulled responses file
+      if (fs.existsSync(responsesLocalPath)) {
+        const content = fs.readFileSync(responsesLocalPath, 'utf-8');
         const data = JSON.parse(content);
 
-        return [
-          {
-            filename: `${filename}.json`,
-            data: data,
-          },
-        ];
-      } else {
-        console.log('No responses file found on device');
-        return [];
+        result.push({
+          filename: `${filename}.json`,
+          data: data,
+        });
       }
+
+      // If linkStorage is true, also pull the storage file
+      if (linkStorage) {
+        const storageRemotePath = `/data/user/0/${packageName}/files/storage-records.json`;
+        const storageLocalPath = path.join(
+          savePath,
+          `${filename}-storage.json`
+        );
+
+        console.log(
+          `Pulling storage from ${storageRemotePath} to ${storageLocalPath}`
+        );
+        try {
+          await this.runAdbCommand(
+            `adb -s ${deviceId} pull ${storageRemotePath} ${storageLocalPath}`
+          );
+
+          // Read and parse the pulled storage file
+          if (fs.existsSync(storageLocalPath)) {
+            const content = fs.readFileSync(storageLocalPath, 'utf-8');
+            const data = JSON.parse(content);
+
+            result.push({
+              filename: `${filename}-storage.json`,
+              data: data,
+            });
+          }
+        } catch (error) {
+          console.error('Error pulling storage file:', error);
+          // Don't throw the error, just log it and continue
+        }
+      }
+
+      return result;
     } catch (error) {
       console.error('Error pulling responses:', error);
       throw error;
@@ -183,6 +217,20 @@ export class AdbService {
     await this.runAdbCommand(
       `adb -s ${deviceId} push ${localPath} ${remotePath}`
     );
+
+    // Check if there's an associated storage file
+    const storageFilename = selectedFile.replace('.json', '-storage.json');
+    const storageLocalPath = path.join(savePath, storageFilename);
+    const storageRemotePath = `/data/user/0/${packageName}/files/storage-mock.json`;
+
+    if (fs.existsSync(storageLocalPath)) {
+      console.log(
+        `Pushing storage from ${storageLocalPath} to device ${deviceId}`
+      );
+      await this.runAdbCommand(
+        `adb -s ${deviceId} push ${storageLocalPath} ${storageRemotePath}`
+      );
+    }
   }
 
   public static async restartApp(
