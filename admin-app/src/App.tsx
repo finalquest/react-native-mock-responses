@@ -202,7 +202,7 @@ function App() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-screen">
         <div
           className={`flex flex-col p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}
         >
@@ -268,7 +268,7 @@ function App() {
             </button>
           </div>
         </div>
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden h-[calc(100vh-4rem)]">
           <EndpointsPanel
             selectedResponse={selectedResponse}
             selectedEndpoint={selectedEndpoint}

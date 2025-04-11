@@ -111,15 +111,15 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
           </button>
         </div>
 
-        <div className="p-4 font-mono text-sm flex-1 flex flex-col">
+        <div className="p-4 font-mono text-sm flex-1 flex flex-col h-full">
           {activeTab === 'headers' ? (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col h-full">
               <label
                 className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}
               >
                 Headers
               </label>
-              <div className="flex-1 relative">
+              <div className="flex-1 relative h-full overflow-y-auto">
                 <SyntaxHighlighter
                   language="json"
                   style={tomorrow}
@@ -146,13 +146,13 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col h-full">
               <label
                 className={`block text-sm font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}
               >
                 Body
               </label>
-              <div className="flex-1 relative">
+              <div className="flex-1 relative h-full overflow-y-auto">
                 <SyntaxHighlighter
                   language="json"
                   style={tomorrow}
