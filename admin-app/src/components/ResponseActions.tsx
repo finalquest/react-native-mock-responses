@@ -171,7 +171,7 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
 
         <button
           onClick={handlePush}
-          disabled={!deviceId || !selectedResponse || isPushing}
+          disabled={!deviceId || !selectedApp || !selectedResponse || isPushing}
           className="px-3 py-1.5 text-sm text-white bg-green-600 hover:bg-green-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPushing ? 'Pushing...' : 'Push'}
