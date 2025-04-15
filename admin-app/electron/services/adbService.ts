@@ -10,6 +10,13 @@ const execAsync = promisify(exec);
 const PROJECT_ROOT = app.getAppPath();
 const RESPONSES_DIR = path.join(PROJECT_ROOT, 'src', 'responses');
 
+const MOCK_FILES = {
+  MSW: 'msw-mock.json',
+  STORAGE: 'storage-mock.json',
+  RESPONSES: 'msw-responses.json',
+  STORAGE_RECORDS: 'storage-records.json',
+} as const;
+
 interface InstalledApp {
   packageName: string;
   appName: string;
@@ -140,7 +147,7 @@ export class AdbService {
       const result: ResponseFile[] = [];
 
       // Pull the responses file from the device
-      const responsesRemotePath = `/data/user/0/${packageName}/files/msw-responses.json`;
+      const responsesRemotePath = `/data/user/0/${packageName}/files/${MOCK_FILES.RESPONSES}`;
       const responsesLocalPath = path.join(savePath, `${filename}.json`);
 
       console.log(
@@ -163,7 +170,7 @@ export class AdbService {
 
       // If linkStorage is true, also pull the storage file
       if (linkStorage) {
-        const storageRemotePath = `/data/user/0/${packageName}/files/storage-records.json`;
+        const storageRemotePath = `/data/user/0/${packageName}/files/${MOCK_FILES.STORAGE_RECORDS}`;
         const storageLocalPath = path.join(
           savePath,
           `${filename}-storage.json`
@@ -211,7 +218,7 @@ export class AdbService {
 
     const savePath = FileService.getSavePath() || RESPONSES_DIR;
     const localPath = path.join(savePath, selectedFile);
-    const remotePath = `/data/user/0/${packageName}/files/msw-mock.json`;
+    const remotePath = `/data/user/0/${packageName}/files/${MOCK_FILES.MSW}`;
 
     console.log(`Pushing responses from ${localPath} to device ${deviceId}`);
     await this.runAdbCommand(
@@ -221,7 +228,7 @@ export class AdbService {
     // Check if there's an associated storage file
     const storageFilename = selectedFile.replace('.json', '-storage.json');
     const storageLocalPath = path.join(savePath, storageFilename);
-    const storageRemotePath = `/data/user/0/${packageName}/files/storage-mock.json`;
+    const storageRemotePath = `/data/user/0/${packageName}/files/${MOCK_FILES.STORAGE}`;
 
     if (fs.existsSync(storageLocalPath)) {
       console.log(
@@ -256,10 +263,10 @@ export class AdbService {
   ): Promise<void> {
     try {
       await this.runAdbCommand(
-        `adb -s ${deviceId} shell rm -f /data/user/0/${packageName}/files/msw-mock.json`
+        `adb -s ${deviceId} shell rm -f /data/user/0/${packageName}/files/${MOCK_FILES.MSW}`
       );
-      console.log(
-        `Cleaned msw-mock file for package ${packageName} on device ${deviceId}`
+      await this.runAdbCommand(
+        `adb -s ${deviceId} shell rm -f /data/user/0/${packageName}/files/${MOCK_FILES.STORAGE}`
       );
     } catch (error) {
       console.error('Error cleaning files:', error);
