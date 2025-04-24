@@ -63,6 +63,26 @@ export const CreateEndpointModal: React.FC<CreateEndpointModalProps> = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+
+      // Insert two spaces at the cursor position
+      const newValue = value.substring(0, start) + '  ' + value.substring(end);
+
+      setBody(newValue);
+
+      // Move cursor after the inserted spaces
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 2;
+      }, 0);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValid) {
@@ -193,6 +213,7 @@ export const CreateEndpointModal: React.FC<CreateEndpointModalProps> = ({
               <textarea
                 value={body}
                 onChange={handleBodyChange}
+                onKeyDown={handleKeyDown}
                 className={`w-full px-3 py-2 rounded font-mono text-sm ${
                   isDarkMode
                     ? 'bg-gray-700 border-gray-600 text-white'

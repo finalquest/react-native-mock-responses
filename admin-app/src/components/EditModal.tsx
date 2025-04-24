@@ -63,6 +63,22 @@ export const EditModal: React.FC<EditModalProps> = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+
+      // Insert two spaces at the cursor position
+      const newValue = value.substring(0, start) + '  ' + value.substring(end);
+
+      setBody(newValue);
+      setCursorPosition(start + 2);
+    }
+  };
+
   const handleSave = () => {
     if (!isValid) {
       setError({
@@ -122,6 +138,7 @@ export const EditModal: React.FC<EditModalProps> = ({
             ref={textareaRef}
             value={body}
             onChange={handleBodyChange}
+            onKeyDown={handleKeyDown}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart)}
             className={`w-full h-full p-2 font-mono text-sm rounded ${
               isDarkMode
