@@ -82,14 +82,17 @@ function App() {
     }
   };
 
-  const handleUpdateEndpoint = async (updatedEndpoint: any) => {
-    if (!selectedResponse || !selectedEndpoint) return;
+  const handleUpdateEndpoint = async (
+    endpointKey: string,
+    endpointData: any
+  ) => {
+    if (!selectedResponse) return;
 
     const updatedResponse = {
       ...selectedResponse,
       data: {
         ...selectedResponse.data,
-        [selectedEndpoint]: updatedEndpoint,
+        [endpointKey]: endpointData,
       },
     };
 
@@ -98,16 +101,16 @@ function App() {
         filename: selectedResponse.filename,
         content: updatedResponse.data,
       });
-      setSelectedResponse(updatedResponse);
-      setResponses((prevResponses) =>
-        prevResponses.map((response) =>
-          response.filename === selectedResponse.filename
-            ? updatedResponse
-            : response
+
+      setResponses((prev) =>
+        prev.map((r) =>
+          r.filename === selectedResponse.filename ? updatedResponse : r
         )
       );
+      setSelectedResponse(updatedResponse);
+      setSelectedEndpoint(endpointKey);
     } catch (error) {
-      console.error('Error updating endpoint:', error);
+      console.error('Error saving response file:', error);
     }
   };
 
@@ -277,6 +280,7 @@ function App() {
             isDarkMode={isDarkMode}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            onUpdateEndpoint={handleUpdateEndpoint}
           />
           <MainPanel
             selectedResponse={selectedResponse}

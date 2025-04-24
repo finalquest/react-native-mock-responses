@@ -13,5 +13,4 @@ export interface ResponseFile {
   filename: string;
   data: Record<string, ResponseData>;
   storage?: StorageData;
-  hasStorage?: boolean;
 }
