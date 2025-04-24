@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { ResponseFile } from '../types/response';
 
 interface FileDrawerProps {
@@ -20,6 +20,35 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
   activeTab,
   onTabChange,
 }) => {
+  const [width, setWidth] = useState(256); // 64 * 4 (default w-64)
+  const isResizing = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing.current) return;
+    const delta = e.clientX - startX.current;
+    const newWidth = Math.max(200, Math.min(500, startWidth.current + delta));
+    setWidth(newWidth);
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    isResizing.current = false;
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', stopResizing);
+  }, [handleMouseMove]);
+
+  const startResizing = useCallback(
+    (e: React.MouseEvent) => {
+      isResizing.current = true;
+      startX.current = e.clientX;
+      startWidth.current = width;
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', stopResizing);
+    },
+    [width, handleMouseMove, stopResizing]
+  );
+
   return (
     <div
       className={`
@@ -27,10 +56,11 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
         ${isDarkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}
         ${isOpen ? 'w-64' : 'w-0'}
       `}
+      style={{ width: isOpen ? `${width}px` : '0' }}
     >
       <div
         className={`
-        h-full w-64 p-4
+        h-full p-4
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}
@@ -108,6 +138,10 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
           ))}
         </div>
       </div>
+      <div
+        className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-blue-500"
+        onMouseDown={startResizing}
+      />
     </div>
   );
 };
