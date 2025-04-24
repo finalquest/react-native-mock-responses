@@ -9,6 +9,7 @@ interface FileDrawerProps {
   isDarkMode: boolean;
   activeTab: 'responses' | 'storage';
   onTabChange: (tab: 'responses' | 'storage') => void;
+  onRefresh: () => void;
 }
 
 export const FileDrawer: React.FC<FileDrawerProps> = ({
@@ -19,6 +20,7 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
   isDarkMode,
   activeTab,
   onTabChange,
+  onRefresh,
 }) => {
   const [width, setWidth] = useState(256); // 64 * 4 (default w-64)
   const isResizing = useRef(false);
@@ -49,6 +51,14 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
     [width, handleMouseMove, stopResizing]
   );
 
+  const handleOpenFolder = async () => {
+    try {
+      await window.api.openFileExplorer();
+    } catch (error) {
+      console.error('Error opening file explorer:', error);
+    }
+  };
+
   return (
     <div
       className={`
@@ -65,11 +75,53 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}
       >
-        <h2
-          className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}
-        >
-          Response Files
-        </h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2
+            className={`text-xl font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}
+          >
+            Response Files
+          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onRefresh}
+              className="p-1 rounded hover:bg-gray-700 transition-colors"
+              title="Refresh files"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={handleOpenFolder}
+              className="p-1 rounded hover:bg-gray-700 transition-colors"
+              title="Open folder in file explorer"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
 
         {/* Tabs */}
         <div

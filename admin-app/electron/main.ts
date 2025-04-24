@@ -184,7 +184,44 @@ function setupIpcHandlers() {
   );
 
   ipcMain.handle('get-save-path', async () => {
-    return FileService.getSavePath();
+    console.log('Main: get-save-path handler called');
+    try {
+      return FileService.getSavePath();
+    } catch (error) {
+      console.error('Main: Error in get-save-path handler:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('open-file-explorer', async () => {
+    console.log('Main: open-file-explorer handler called');
+    try {
+      const savePath = FileService.getSavePath();
+      if (savePath) {
+        const { exec } = require('child_process');
+        const command =
+          process.platform === 'win32'
+            ? `explorer "${savePath}"`
+            : process.platform === 'darwin'
+              ? `open "${savePath}"`
+              : `xdg-open "${savePath}"`;
+
+        await new Promise((resolve, reject) => {
+          exec(command, (error: any) => {
+            if (error) {
+              console.error('Error opening file explorer:', error);
+              reject(error);
+            } else {
+              resolve(true);
+            }
+          });
+        });
+      }
+      return true;
+    } catch (error) {
+      console.error('Main: Error in open-file-explorer handler:', error);
+      throw error;
+    }
   });
 }
 

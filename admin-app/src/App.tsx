@@ -201,6 +201,7 @@ function App() {
         isDarkMode={isDarkMode}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onRefresh={fetchResponses}
       />
       <div className="flex-1 flex flex-col h-screen">
         <div

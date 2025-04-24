@@ -48,4 +48,5 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.removeListener('responses-updated', subscription);
     };
   },
+  openFileExplorer: () => ipcRenderer.invoke('open-file-explorer'),
 });

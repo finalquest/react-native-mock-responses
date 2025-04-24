@@ -27,6 +27,7 @@ declare global {
       setSavePath(path: string): Promise<boolean>;
       getSavePath(): Promise<string>;
       onResponsesUpdated(callback: (files: ResponseFile[]) => void): () => void;
+      openFileExplorer(): Promise<boolean>;
     };
   }
 }
