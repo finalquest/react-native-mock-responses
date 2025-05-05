@@ -8,7 +8,7 @@ import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 interface EndpointDetailsProps {
   selectedResponse: ResponseFile | null;
   selectedEndpoint: string | null;
-  onUpdateEndpoint: (updatedEndpoint: any) => void;
+  onUpdateEndpoint: (endpoint: string, updatedEndpoint: any) => void;
   isDarkMode: boolean;
 }
 
@@ -47,7 +47,7 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
       ...endpointData,
       body: newBody,
     };
-    onUpdateEndpoint(updatedEndpoint);
+    onUpdateEndpoint(selectedEndpoint, updatedEndpoint);
   };
 
   const handleSaveHeaders = (newHeaders: any) => {
@@ -55,7 +55,7 @@ export const EndpointDetails: React.FC<EndpointDetailsProps> = ({
       ...endpointData,
       headers: newHeaders,
     };
-    onUpdateEndpoint(updatedEndpoint);
+    onUpdateEndpoint(selectedEndpoint, updatedEndpoint);
   };
 
   return (

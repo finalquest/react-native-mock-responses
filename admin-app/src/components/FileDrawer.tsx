@@ -182,7 +182,7 @@ export const FileDrawer: React.FC<FileDrawerProps> = ({
               >
                 {activeTab === 'responses'
                   ? `${Object.keys(response.data).length} endpoints`
-                  : response.hasStorage
+                  : response.storage
                     ? 'Has storage'
                     : 'No storage'}
               </span>

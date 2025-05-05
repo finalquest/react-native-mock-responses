@@ -6,7 +6,7 @@ import { StorageDetails } from './StorageDetails';
 interface MainPanelProps {
   selectedResponse: ResponseFile | null;
   selectedEndpoint: string | null;
-  onUpdateEndpoint: (updatedEndpoint: any) => void;
+  onUpdateEndpoint: (endpointKey: string, endpointData: any) => void;
   isDarkMode: boolean;
   activeTab: 'responses' | 'storage';
   onUpdateStorage?: (updatedStorage: any) => void;
